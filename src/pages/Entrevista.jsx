@@ -3,6 +3,7 @@ import { getEntrevistasPorPostulacion, eliminarEntrevista } from "../lib/api/ent
 import NuevaEntrevista from "./NuevaEntrevista";
 import AlertBanner from "../components/ui/alertbanner";
 import { X, Calendar, User, Edit3, Trash2, Loader2, Plus } from "lucide-react";
+import { supabase } from "../lib/supabaseClient";
 
 export default function Entrevista({ postulacion, onClose }) {
   const [entrevistas, setEntrevistas] = useState([]);
@@ -99,8 +100,21 @@ export default function Entrevista({ postulacion, onClose }) {
             <NuevaEntrevista
               postulacion={postulacion}
               entrevistaEditar={entrevistaSeleccionada}
-              onGuardado={() => {
+              onGuardado={async () => {
                 setMostrarFormulario(false);
+
+                // Si es una nueva entrevista (no edición), actualizamos el estado del embudo
+                if (!entrevistaSeleccionada && postulacion?.id) {
+                  try {
+                    await supabase
+                      .from("postulacion")
+                      .update({ embudo_estado: "Entrevistado", updated_at: new Date() })
+                      .eq("id", postulacion.id);
+                  } catch (err) {
+                    console.error("Error al actualizar estado de la postulación:", err);
+                  }
+                }
+
                 setEntrevistaSeleccionada(null);
                 setMensajeFeedback({
                   tipo: "success",
