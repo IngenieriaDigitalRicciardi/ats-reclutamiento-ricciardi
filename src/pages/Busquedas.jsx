@@ -109,7 +109,7 @@ export default function Busquedas({ onCrearNueva, onVerDetalleBusqueda }) {
   };
 
   const sucursalesFiltradasFiltro = sucursales.filter(
-    (s) => !filtroEmpresa || s.id_empresa === filtroEmpresa,
+    (s) => !filtroEmpresa || String(s.id_empresa) === String(filtroEmpresa),
   );
 
   const limpiarFiltros = () => {
@@ -129,9 +129,16 @@ export default function Busquedas({ onCrearNueva, onVerDetalleBusqueda }) {
       b.empresa?.nombre?.toLowerCase().includes(busquedaTexto.toLowerCase()) ||
       b.sucursal?.nombre?.toLowerCase().includes(busquedaTexto.toLowerCase());
 
-    const empresaMatch = !filtroEmpresa || b.id_empresa === filtroEmpresa;
-    const sucursalMatch = !filtroSucursal || b.id_sucursal === filtroSucursal;
-    const puestoMatch = !filtroPuesto || b.id_puesto === filtroPuesto;
+    // Obtenemos los IDs tanto si vienen directos como si están dentro del objeto relacionado
+    const empresaIdB = b.id_empresa || b.empresa?.id;
+    const sucursalIdB = b.id_sucursal || b.sucursal?.id;
+    const puestoIdB = b.id_puesto || b.puesto?.id;
+
+    // Convertimos ambos a String para evitar conflictos entre números y strings del select
+    const empresaMatch = !filtroEmpresa || String(empresaIdB) === String(filtroEmpresa);
+    const sucursalMatch = !filtroSucursal || String(sucursalIdB) === String(filtroSucursal);
+    const puestoMatch = !filtroPuesto || String(puestoIdB) === String(filtroPuesto);
+    
     const estadoMatch = filtroEstado === "Todas" || b.estado === filtroEstado;
 
     let fechaMatch = true;
