@@ -20,6 +20,16 @@ export const NuevaBusquedaModal = ({ isOpen, onClose, onSuccess }) => {
   useEffect(() => {
     if (isOpen) {
       loadInitialData();
+    } else {
+      // Limpiar formulario y catálogos dependientes al cerrar el modal
+      setFormData({
+        idEmpresa: '',
+        idSucursal: '',
+        idDepartamento: '',
+        idPuesto: ''
+      });
+      setSucursales([]);
+      setPuestos([]);
     }
   }, [isOpen]);
 
@@ -80,18 +90,18 @@ export const NuevaBusquedaModal = ({ isOpen, onClose, onSuccess }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 my-auto border border-slate-200">
         <h2 className="text-xl font-bold mb-4 text-slate-800">Nueva Búsqueda Laboral</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Empresa */}
           <div>
-            <label className="block text-sm font-semibold text-slate-600 mb-1">Empresa</label>
+            <label className="block text-xs font-semibold text-slate-600 uppercase mb-1">Empresa</label>
             <select
               value={formData.idEmpresa}
               onChange={(e) => handleEmpresaChange(e.target.value)}
-              className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
               required
             >
               <option value="">-- Seleccionar Empresa --</option>
@@ -103,12 +113,12 @@ export const NuevaBusquedaModal = ({ isOpen, onClose, onSuccess }) => {
 
           {/* Sucursal */}
           <div>
-            <label className="block text-sm font-semibold text-slate-600 mb-1">Sucursal</label>
+            <label className="block text-xs font-semibold text-slate-600 uppercase mb-1">Sucursal</label>
             <select
               value={formData.idSucursal}
               onChange={(e) => setFormData({ ...formData, idSucursal: e.target.value })}
               disabled={!formData.idEmpresa}
-              className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100"
+              className="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:bg-slate-100 disabled:cursor-not-allowed"
               required
             >
               <option value="">-- Seleccionar Sucursal --</option>
@@ -120,11 +130,11 @@ export const NuevaBusquedaModal = ({ isOpen, onClose, onSuccess }) => {
 
           {/* Departamento */}
           <div>
-            <label className="block text-sm font-semibold text-slate-600 mb-1">Departamento</label>
+            <label className="block text-xs font-semibold text-slate-600 uppercase mb-1">Departamento</label>
             <select
               value={formData.idDepartamento}
               onChange={(e) => handleDepartamentoChange(e.target.value)}
-              className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
               required
             >
               <option value="">-- Seleccionar Departamento --</option>
@@ -136,12 +146,12 @@ export const NuevaBusquedaModal = ({ isOpen, onClose, onSuccess }) => {
 
           {/* Puesto */}
           <div>
-            <label className="block text-sm font-semibold text-slate-600 mb-1">Puesto Solicitado</label>
+            <label className="block text-xs font-semibold text-slate-600 uppercase mb-1">Puesto Solicitado</label>
             <select
               value={formData.idPuesto}
               onChange={(e) => setFormData({ ...formData, idPuesto: e.target.value })}
               disabled={!formData.idDepartamento}
-              className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100"
+              className="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:bg-slate-100 disabled:cursor-not-allowed"
               required
             >
               <option value="">-- Seleccionar Puesto --</option>
@@ -152,18 +162,18 @@ export const NuevaBusquedaModal = ({ isOpen, onClose, onSuccess }) => {
           </div>
 
           {/* Botones */}
-          <div className="flex justify-end gap-2 pt-4 border-t">
+          <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 hover:bg-slate-50"
+              className="px-4 py-2 border border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium"
+              className="px-5 py-2 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 disabled:opacity-50 shadow-sm transition-colors"
             >
               {loading ? 'Creando...' : 'Abrir Búsqueda'}
             </button>

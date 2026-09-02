@@ -1,9 +1,26 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../lib/AuthContext';
-import { ShieldCheck } from 'lucide-react';
+import { ShieldCheck, Loader2 } from 'lucide-react';
+import AlertBanner from '../components/ui/alertbanner';
 
 export default function Login() {
   const { loginWithAzure } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [mensajeFeedback, setMensajeFeedback] = useState(null);
+
+  const handleLogin = async () => {
+    try {
+      setLoading(true);
+      setMensajeFeedback(null);
+      await loginWithAzure();
+    } catch (error) {
+      setMensajeFeedback({
+        tipo: 'error',
+        texto: 'Error al iniciar sesión con Microsoft: ' + (error.message || 'Intente nuevamente.'),
+      });
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 relative overflow-hidden">
@@ -30,20 +47,37 @@ export default function Login() {
           </div>
         </div>
 
+        {/* Alerta de Feedback si ocurre algún error en el inicio de sesión */}
+        <AlertBanner
+          tipo={mensajeFeedback?.tipo}
+          texto={mensajeFeedback?.texto}
+          onClose={() => setMensajeFeedback(null)}
+        />
+
         {/* Botón de Inicio de Sesión con Microsoft / Azure */}
         <div className="space-y-3">
           <button
-            onClick={loginWithAzure}
-            className="w-full py-3.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-semibold flex items-center justify-center gap-3 transition-all duration-200 shadow-lg shadow-blue-600/25 hover:shadow-blue-600/40 active:scale-[0.98]"
+            onClick={handleLogin}
+            disabled={loading}
+            className="w-full py-3.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-semibold flex items-center justify-center gap-3 transition-all duration-200 shadow-lg shadow-blue-600/25 hover:shadow-blue-600/40 active:scale-[0.98] disabled:opacity-75 disabled:cursor-not-allowed"
           >
-            {/* Icono corporativo de Microsoft (SVG limpio) */}
-            <svg className="w-5 h-5" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
-              <rect x="1" y="1" width="9" height="9" fill="#f25022"/>
-              <rect x="1" y="11" width="9" height="9" fill="#00a4ef"/>
-              <rect x="11" y="1" width="9" height="9" fill="#7fba00"/>
-              <rect x="11" y="11" width="9" height="9" fill="#ffb900"/>
-            </svg>
-            <span>Iniciar sesión con Microsoft</span>
+            {loading ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>Conectando con Microsoft...</span>
+              </>
+            ) : (
+              <>
+                {/* Icono corporativo de Microsoft (SVG limpio) */}
+                <svg className="w-5 h-5 shrink-0" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="1" y="1" width="9" height="9" fill="#f25022"/>
+                  <rect x="1" y="11" width="9" height="9" fill="#00a4ef"/>
+                  <rect x="11" y="1" width="9" height="9" fill="#7fba00"/>
+                  <rect x="11" y="11" width="9" height="9" fill="#ffb900"/>
+                </svg>
+                <span>Iniciar sesión con Microsoft</span>
+              </>
+            )}
           </button>
         </div>
 

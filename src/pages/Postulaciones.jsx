@@ -28,22 +28,18 @@ export default function Postulaciones({
   const [loading, setLoading] = useState(true);
   const [mensajeFeedback, setMensajeFeedback] = useState(null);
 
-  // Estado para controlar la postulación seleccionada para ver sus entrevistas
   const [
     postulacionSeleccionadaEntrevista,
     setPostulacionSeleccionadaEntrevista,
   ] = useState(null);
 
-  // Estados para la lógica de eliminación con advertencia
   const [postulacionAEliminar, setPostulacionAEliminar] = useState(null);
   const [tieneEntrevistas, setTieneEntrevistas] = useState(false);
   const [verModalAdvertencia, setVerModalAdvertencia] = useState(false);
 
-  // --- 2. ESTADOS PARA EL MODAL DE INGRESO ---
   const [postulacionAprobandoId, setPostulacionAprobandoId] = useState(null);
   const [mostrarModalIngreso, setMostrarModalIngreso] = useState(false);
 
-  // Filtros individuales
   const [filtroCandidato, setFiltroCandidato] = useState("");
   const [filtroPuesto, setFiltroPuesto] = useState("");
   const [filtroEmpresa, setFiltroEmpresa] = useState("TODAS");
@@ -59,8 +55,8 @@ export default function Postulaciones({
       setLoading(true);
       const [resPostulaciones, resEmpresas, resSucursales] = await Promise.all([
         getPostulaciones(),
-        supabase.from("empresa").select("nombre").order("nombre"),
-        supabase.from("sucursal").select("nombre").order("nombre"),
+        supabase.from("empresa").select("id, nombre").order("nombre"),
+        supabase.from("sucursal").select("id, nombre").order("nombre"),
       ]);
 
       setPostulaciones(resPostulaciones || []);
@@ -76,17 +72,14 @@ export default function Postulaciones({
     }
   }
 
-  // --- 3. MODIFICACIÓN DE CAMBIAR ESTADO ---
   const handleCambiarEstado = async (id, nuevoEmbudoEstado) => {
     if (nuevoEmbudoEstado === "Aprobado") {
-      // Si eligen Aprobado, abrimos el modal de ingreso en vez de actualizar directamente
       setPostulacionAprobandoId(id);
       setMostrarModalIngreso(true);
       return;
     }
 
     try {
-      // 1. Actualizar el estado de la postulación
       const { error: errorPostulacion } = await supabase
         .from("postulacion")
         .update({ embudo_estado: nuevoEmbudoEstado, updated_at: new Date() })
@@ -94,17 +87,15 @@ export default function Postulaciones({
 
       if (errorPostulacion) throw errorPostulacion;
 
-      // 2. Si el estado es "Entrevistado", actualizamos las entrevistas a "Pendiente"
       if (nuevoEmbudoEstado === "Entrevistado") {
         const { error: errorEntrevistas } = await supabase
           .from("entrevista")
-          .update({ estado: "Pendiente" }) // Cambia "Pendiente" por el texto exacto que uses en tu base para entrevistas pendientes
+          .update({ estado: "Pendiente" })
           .eq("id_postulacion", id);
 
         if (errorEntrevistas) throw errorEntrevistas;
       }
 
-      // 3. Si el estado es "Descartado", actualizamos las entrevistas a "Descartado"
       if (nuevoEmbudoEstado === "Descartado") {
         const { error: errorEntrevistas } = await supabase
           .from("entrevista")
@@ -114,11 +105,10 @@ export default function Postulaciones({
         if (errorEntrevistas) throw errorEntrevistas;
       }
 
-      // Actualizamos el estado local en React
       setPostulaciones((prev) =>
         prev.map((p) =>
-          p.id === id ? { ...p, embudo_estado: nuevoEmbudoEstado } : p,
-        ),
+          p.id === id ? { ...p, embudo_estado: nuevoEmbudoEstado } : p
+        )
       );
       setMensajeFeedback({
         tipo: "success",
@@ -132,7 +122,6 @@ export default function Postulaciones({
     }
   };
 
-  // 1. Comprobar entrevistas antes de abrir el modal de borrado
   const comprobarAntesDeEliminar = async (postulacion) => {
     setPostulacionAEliminar(postulacion);
 
@@ -141,16 +130,10 @@ export default function Postulaciones({
       .select("id")
       .eq("id_postulacion", postulacion.id);
 
-    if (!error && entrevistas && entrevistas.length > 0) {
-      setTieneEntrevistas(true);
-    } else {
-      setTieneEntrevistas(false);
-    }
-
+    setTieneEntrevistas(!error && entrevistas && entrevistas.length > 0);
     setVerModalAdvertencia(true);
   };
 
-  // 2. Ejecutar la eliminación real en Supabase
   const confirmarEliminacion = async () => {
     if (!postulacionAEliminar) return;
 
@@ -163,7 +146,6 @@ export default function Postulaciones({
       if (error) throw error;
 
       setPostulaciones((prev) => prev.filter((p) => p.id !== postulacionAEliminar.id));
-      
       setVerModalAdvertencia(false);
       setPostulacionAEliminar(null);
       setMensajeFeedback({
@@ -179,7 +161,6 @@ export default function Postulaciones({
     }
   };
 
-  // Lógica de filtrado cruzado usando embudo_estado
   const postulacionesFiltradas = postulaciones.filter((p) => {
     const nombreCompleto =
       `${p.candidato?.nombre || ""} ${p.candidato?.apellido || ""}`.toLowerCase();
@@ -307,11 +288,8 @@ export default function Postulaciones({
               className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none"
             >
               <option value="TODAS">Todas las Empresas</option>
-              {empresasBD.map((emp, index) => (
-                <option
-                  key={`emp-${emp.id || index}-${emp.nombre}`}
-                  value={emp.nombre}
-                >
+              {empresasBD.map((emp) => (
+                <option key={emp.id} value={emp.nombre}>
                   {emp.nombre}
                 </option>
               ))}
@@ -328,11 +306,8 @@ export default function Postulaciones({
               className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none"
             >
               <option value="TODAS">Todas las Sucursales</option>
-              {sucursalesBD.map((suc, index) => (
-                <option
-                  key={`suc-${suc.id || index}-${suc.nombre}`}
-                  value={suc.nombre}
-                >
+              {sucursalesBD.map((suc) => (
+                <option key={suc.id} value={suc.nombre}>
                   {suc.nombre}
                 </option>
               ))}
@@ -376,10 +351,7 @@ export default function Postulaciones({
             </thead>
             <tbody className="divide-y divide-slate-100 text-sm">
               {postulacionesFiltradas.map((p) => (
-                <tr
-                  key={p.id}
-                  className="hover:bg-slate-50/50 transition-colors"
-                >
+                <tr key={p.id} className="hover:bg-slate-50/50 transition-colors">
                   <td className="p-4">
                     <div className="font-semibold text-slate-800">
                       {p.candidato?.nombre} {p.candidato?.apellido || ""}
@@ -455,28 +427,17 @@ export default function Postulaciones({
                         <option value="Descartado">Descartado</option>
                       </select>
 
-                      {p.embudo_estado === "Entrevistado" && (
+                      {(p.embudo_estado === "Entrevistado" || p.embudo_estado === "Descartado") && (
                         <button
-                          onClick={() =>
-                            setPostulacionSeleccionadaEntrevista(p)
-                          }
-                          className="inline-flex items-center justify-center gap-1.5 text-xs font-medium text-amber-800 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-lg border border-amber-200 transition-colors shadow-sm"
+                          onClick={() => setPostulacionSeleccionadaEntrevista(p)}
+                          className={`inline-flex items-center justify-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors shadow-sm ${
+                            p.embudo_estado === "Descartado"
+                              ? "text-red-800 bg-red-50 hover:bg-red-100 border-red-200"
+                              : "text-amber-800 bg-amber-50 hover:bg-amber-100 border-amber-200"
+                          }`}
                           title="Gestionar entrevistas de esta postulación"
                         >
-                          <Calendar className="w-3.5 h-3.5 text-amber-600" />
-                          Ver Entrevistas
-                        </button>
-                      )}
-
-                      {p.embudo_estado === "Descartado" && (
-                        <button
-                          onClick={() =>
-                            setPostulacionSeleccionadaEntrevista(p)
-                          }
-                          className="inline-flex items-center justify-center gap-1.5 text-xs font-medium text-red-800 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-lg border border-amber-200 transition-colors shadow-sm"
-                          title="Gestionar entrevistas de esta postulación"
-                        >
-                          <Calendar className="w-3.5 h-3.5 text-red-600" />
+                          <Calendar className={`w-3.5 h-3.5 ${p.embudo_estado === "Descartado" ? "text-red-600" : "text-amber-600"}`} />
                           Ver Entrevistas
                         </button>
                       )}
@@ -489,7 +450,6 @@ export default function Postulaciones({
                       : "—"}
                   </td>
 
-                  {/* Columna de Acciones (Bloqueada si está Aprobado) */}
                   <td className="p-4 text-center">
                     {p.embudo_estado === "Aprobado" ? (
                       <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-200 inline-block">
@@ -512,7 +472,6 @@ export default function Postulaciones({
         </div>
       </div>
 
-      {/* --- 4. RENDERIZAR EL MODAL DE INGRESO CONDICIONALMENTE --- */}
       {mostrarModalIngreso && (
         <ModalIngreso
           idPostulacion={postulacionAprobandoId}
@@ -525,12 +484,11 @@ export default function Postulaciones({
               tipo: "success",
               texto: "¡Ingreso registrado exitosamente en el sistema!",
             });
-            cargarDatosIniciales(); // Recargamos para ver reflejado el cambio de estado
+            cargarDatosIniciales();
           }}
         />
       )}
 
-      {/* MODAL DE ADVERTENCIA PARA ELIMINACIÓN */}
       {verModalAdvertencia && (
         <div className="fixed inset-0 bg-slate-900/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4">
@@ -555,7 +513,7 @@ export default function Postulaciones({
               <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 space-y-1">
                 <p className="font-bold">⚠️ Atención:</p>
                 <p>
-                  Esta postulación cuenta con **entrevistas u otros registros asociados**. Si confirmas la acción, los datos vinculados también se eliminarán de forma permanente.
+                  Esta postulación cuenta con registros de entrevistas asociados. Si confirmas la acción, los datos vinculados también se eliminarán de forma permanente.
                 </p>
               </div>
             )}
@@ -578,7 +536,6 @@ export default function Postulaciones({
         </div>
       )}
 
-      {/* Renderizado condicional del componente Entrevista */}
       {postulacionSeleccionadaEntrevista && (
         <Entrevista
           postulacion={postulacionSeleccionadaEntrevista}

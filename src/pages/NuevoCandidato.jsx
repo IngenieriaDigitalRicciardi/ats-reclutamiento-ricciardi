@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { supabase } from '../lib/supabaseClient'
-import { crearCandidato, actualizarCandidato, getCandidatoById } from '../lib/api/candidatos'
-import AlertBanner from '../components/ui/alertbanner'
-import { validarCandidato } from '../utils/validaciones'
-import { ArrowLeft, Save, Loader2, User, Phone, Mail, Link as LinkIcon, MapPin, CreditCard, Globe, Search } from 'lucide-react'
+import React, { useState, useEffect, useRef } from 'react';
+import { supabase } from '../lib/supabaseClient';
+import { crearCandidato, actualizarCandidato, getCandidatoById } from '../lib/api/candidatos';
+import AlertBanner from '../components/ui/alertbanner';
+import { validarCandidato } from '../utils/validaciones';
+import { ArrowLeft, Save, Loader2, User, Phone, Mail, Link as LinkIcon, MapPin, CreditCard, Globe, Search } from 'lucide-react';
 
 export default function NuevoCandidato({ candidatoId = null, onVolver }) {
   const [formData, setFormData] = useState({
@@ -15,88 +15,88 @@ export default function NuevoCandidato({ candidatoId = null, onVolver }) {
     ciudad: '',
     id_fuente: '', 
     cv_url: '',
-  })
+  });
 
-  const [fuentes, setFuentes] = useState([])
-  const [sugerenciasCiudades, setSugerenciasCiudades] = useState([])
-  const [buscandoCiudad, setBuscandoCiudad] = useState(false)
-  const [mostrarDropdown, setMostrarDropdown] = useState(false)
-  const dropdownRef = useRef(null)
+  const [fuentes, setFuentes] = useState([]);
+  const [sugerenciasCiudades, setSugerenciasCiudades] = useState([]);
+  const [buscandoCiudad, setBuscandoCiudad] = useState(false);
+  const [mostrarDropdown, setMostrarDropdown] = useState(false);
+  const dropdownRef = useRef(null);
 
-  const [loading, setLoading] = useState(false)
-  const [loadingDatos, setLoadingDatos] = useState(false)
-  const [mensajeFeedback, setMensajeFeedback] = useState(null)
-  const [erroresCampos, setErroresCampos] = useState({})
+  const [loading, setLoading] = useState(false);
+  const [loadingDatos, setLoadingDatos] = useState(false);
+  const [mensajeFeedback, setMensajeFeedback] = useState(null);
+  const [erroresCampos, setErroresCampos] = useState({});
 
-  const esEdicion = Boolean(candidatoId)
+  const esEdicion = Boolean(candidatoId);
 
   useEffect(() => {
-    cargarFuentes()
-  }, [])
+    cargarFuentes();
+  }, []);
 
   async function cargarFuentes() {
     try {
       const { data, error } = await supabase
         .from('fuente_reclutamiento')
         .select('id, nombre')
-        .order('nombre', { ascending: true })
+        .order('nombre', { ascending: true });
 
-      if (error) throw error
-      if (data) setFuentes(data)
+      if (error) throw error;
+      if (data) setFuentes(data);
     } catch (error) {
-      console.error('Error al cargar fuentes de reclutamiento:', error)
+      console.error('Error al cargar fuentes de reclutamiento:', error);
     }
   }
 
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setMostrarDropdown(false)
+        setMostrarDropdown(false);
       }
     }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
-    const query = formData.ciudad.trim()
+    const query = formData.ciudad.trim();
     
     if (query.length < 2) {
-      setSugerenciasCiudades([])
-      return
+      setSugerenciasCiudades([]);
+      return;
     }
 
     const timeoutId = setTimeout(async () => {
       try {
-        setBuscandoCiudad(true)
-        const response = await fetch(`https://apis.datos.gob.ar/georef/api/v2.0/localidades?nombre=${encodeURIComponent(query)}&max=10`)
-        const data = await response.json()
+        setBuscandoCiudad(true);
+        const response = await fetch(`https://apis.datos.gob.ar/georef/api/v2.0/localidades?nombre=${encodeURIComponent(query)}&max=10`);
+        const data = await response.json();
         
         if (data && data.localidades) {
-          const resultados = data.localidades.map(loc => `${loc.nombre}, ${loc.provincia.nombre}`)
-          setSugerenciasCiudades(resultados)
-          setMostrarDropdown(true)
+          const resultados = data.localidades.map(loc => `${loc.nombre}, ${loc.provincia.nombre}`);
+          setSugerenciasCiudades(resultados);
+          setMostrarDropdown(true);
         }
       } catch (error) {
-        console.error('Error buscando ciudades:', error)
+        console.error('Error buscando ciudades:', error);
       } finally {
-        setBuscandoCiudad(false)
+        setBuscandoCiudad(false);
       }
-    }, 300)
+    }, 300);
 
-    return () => clearTimeout(timeoutId)
-  }, [formData.ciudad])
+    return () => clearTimeout(timeoutId);
+  }, [formData.ciudad]);
 
   useEffect(() => {
     if (esEdicion) {
-      cargarCandidato()
+      cargarCandidato();
     }
-  }, [candidatoId])
+  }, [candidatoId]);
 
   async function cargarCandidato() {
     try {
-      setLoadingDatos(true)
-      const data = await getCandidatoById(candidatoId)
+      setLoadingDatos(true);
+      const data = await getCandidatoById(candidatoId);
       if (data) {
         setFormData({
           nombre: data.nombre || '',
@@ -107,79 +107,76 @@ export default function NuevoCandidato({ candidatoId = null, onVolver }) {
           ciudad: data.ciudad || '',
           id_fuente: data.id_fuente ? String(data.id_fuente) : '', 
           cv_url: data.cv_url || '',
-        })
+        });
       }
     } catch (error) {
-      setMensajeFeedback({ tipo: 'error', texto: 'Error al cargar el candidato: ' + error.message })
+      setMensajeFeedback({ tipo: 'error', texto: 'Error al cargar el candidato: ' + error.message });
     } finally {
-      setLoadingDatos(false)
+      setLoadingDatos(false);
     }
   }
 
   const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
   const seleccionarCiudad = (ciudadSeleccionada) => {
-    setFormData(prev => ({ ...prev, ciudad: ciudadSeleccionada }))
-    setSugerenciasCiudades([])
-    setMostrarDropdown(false)
-    // Limpiar error de ciudad al seleccionar una válida
-    setErroresCampos(prev => ({ ...prev, ciudad: null }))
-  }
+    setFormData(prev => ({ ...prev, ciudad: ciudadSeleccionada }));
+    setSugerenciasCiudades([]);
+    setMostrarDropdown(false);
+    setErroresCampos(prev => ({ ...prev, ciudad: null }));
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setMensajeFeedback(null)
+    e.preventDefault();
+    setMensajeFeedback(null);
 
-    // Validación centralizada basada en las reglas obligatorias exactas
-    const validacion = validarCandidato(formData)
+    const validacion = validarCandidato(formData);
 
     if (!validacion.esValido) {
-      setErroresCampos(validacion.errores)
-      setMensajeFeedback({ tipo: 'error', texto: 'Por favor, completa los campos obligatorios y revisa los errores.' })
-      return
+      setErroresCampos(validacion.errores);
+      setMensajeFeedback({ tipo: 'error', texto: 'Por favor, completa los campos obligatorios y revisa los errores.' });
+      return;
     }
 
-    setErroresCampos({})
+    setErroresCampos({});
 
     try {
-      setLoading(true)
+      setLoading(true);
       
       const payload = {
         ...formData,
         id_fuente: Number(formData.id_fuente)
-      }
+      };
 
       if (esEdicion) {
-        await actualizarCandidato(candidatoId, payload)
-        setMensajeFeedback({ tipo: 'success', texto: 'Candidato actualizado con éxito.' })
+        await actualizarCandidato(candidatoId, payload);
+        setMensajeFeedback({ tipo: 'success', texto: 'Candidato actualizado con éxito.' });
       } else {
-        await crearCandidato(payload)
-        setMensajeFeedback({ tipo: 'success', texto: 'Candidato registrado con éxito.' })
-        setFormData({ nombre: '', apellido: '', dni: '', telefono: '', email: '', ciudad: '', id_fuente: '', cv_url: '' })
+        await crearCandidato(payload);
+        setMensajeFeedback({ tipo: 'success', texto: 'Candidato registrado con éxito.' });
+        setFormData({ nombre: '', apellido: '', dni: '', telefono: '', email: '', ciudad: '', id_fuente: '', cv_url: '' });
       }
       
       setTimeout(() => {
-        if (onVolver) onVolver()
-      }, 1200)
+        if (onVolver) onVolver();
+      }, 1200);
 
     } catch (error) {
-      // Capturamos el error de llave única de Postgres (código '23505' o mensaje con la restricción)
       if (error.code === '23505' || (error.message && error.message.includes('candidato_telefono_key'))) {
-        setErroresCampos(prev => ({ ...prev, telefono: 'Este número de teléfono ya se encuentra registrado.' }))
+        setErroresCampos(prev => ({ ...prev, telefono: 'Este número de teléfono ya se encuentra registrado.' }));
         setMensajeFeedback({ 
           tipo: 'error', 
           texto: 'Ya existe un candidato registrado con este número de teléfono.' 
-        })
+        });
       } else {
-        setMensajeFeedback({ tipo: 'error', texto: 'Error al guardar: ' + error.message })
+        setMensajeFeedback({ tipo: 'error', texto: 'Error al guardar: ' + error.message });
       }
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   if (loadingDatos) {
     return (
@@ -187,7 +184,7 @@ export default function NuevoCandidato({ candidatoId = null, onVolver }) {
         <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
         <span>Cargando datos del candidato...</span>
       </div>
-    )
+    );
   }
 
   return (
@@ -195,8 +192,9 @@ export default function NuevoCandidato({ candidatoId = null, onVolver }) {
       
       <div className="flex items-center justify-between">
         <button
+          type="button"
           onClick={onVolver}
-          className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 transition-colors"
+          className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
           Volver al listado
@@ -253,7 +251,7 @@ export default function NuevoCandidato({ candidatoId = null, onVolver }) {
           </div>
         </div>
 
-        {/* DNI y Teléfono (PK) */}
+        {/* DNI y Teléfono */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold text-slate-600 uppercase mb-1">DNI (Opcional)</label>
@@ -319,7 +317,7 @@ export default function NuevoCandidato({ candidatoId = null, onVolver }) {
                 placeholder="Escribe para buscar (ej: Mercedes)..."
                 value={formData.ciudad}
                 onChange={handleChange}
-                onFocus={() => { if (sugerenciasCiudades.length > 0) setMostrarDropdown(true) }}
+                onFocus={() => { if (sugerenciasCiudades.length > 0) setMostrarDropdown(true); }}
                 className={`w-full pl-9 pr-9 py-2 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${
                   erroresCampos.ciudad ? 'border-red-500 bg-red-50/30' : 'border-slate-300'
                 }`}
@@ -358,7 +356,7 @@ export default function NuevoCandidato({ candidatoId = null, onVolver }) {
                 name="id_fuente"
                 value={formData.id_fuente}
                 onChange={handleChange}
-                className={`w-full pl-10 pr-3 py-2 border rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${
+                className={`w-full pl-10 pr-3 py-2 border rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer ${
                   erroresCampos.id_fuente ? 'border-red-500 bg-red-50/30' : 'border-slate-300'
                 }`}
               >
@@ -397,14 +395,14 @@ export default function NuevoCandidato({ candidatoId = null, onVolver }) {
           <button
             type="button"
             onClick={onVolver}
-            className="px-4 py-2 border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium transition-colors"
+            className="px-4 py-2 border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium transition-colors cursor-pointer"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl text-sm font-medium transition-colors shadow-sm disabled:opacity-50"
+            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl text-sm font-medium transition-colors shadow-sm disabled:opacity-50 cursor-pointer"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             {esEdicion ? 'Actualizar Candidato' : 'Guardar Candidato'}
@@ -413,5 +411,5 @@ export default function NuevoCandidato({ candidatoId = null, onVolver }) {
 
       </form>
     </div>
-  )
+  );
 }

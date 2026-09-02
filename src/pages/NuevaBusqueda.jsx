@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabaseClient'
 import AlertBanner from '../components/ui/alertbanner'
 import { ArrowLeft, Building2, MapPin, Briefcase, CheckCircle2, Loader2, AlertTriangle, ExternalLink } from 'lucide-react'
 
-export default function NuevaBusqueda({ onVolver }) {
+export default function NuevaBusqueda({ onVolver, onVerBusqueda }) {
   const [empresas, setEmpresas] = useState([])
   const [sucursales, setSucursales] = useState([])
   const [puestos, setPuestos] = useState([])
@@ -142,13 +142,19 @@ export default function NuevaBusqueda({ onVolver }) {
             </div>
           </div>
           
-          {/* Botón para volver a la lista o la acción que necesites */}
+          {/* Botón para ver la búsqueda existente directamente */}
           <button
             type="button"
-            onClick={onVolver}
+            onClick={() => {
+              if (onVerBusqueda) {
+                onVerBusqueda(busquedaExistente.id);
+              } else {
+                onVolver();
+              }
+            }}
             className="shrink-0 inline-flex items-center gap-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors shadow-sm"
           >
-            Ver en la lista <ExternalLink className="w-3.5 h-3.5" />
+            Ver búsqueda <ExternalLink className="w-3.5 h-3.5" />
           </button>
         </div>
       )}

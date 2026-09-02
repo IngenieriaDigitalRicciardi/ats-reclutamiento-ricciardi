@@ -115,26 +115,26 @@ export default function ModalIngreso({ idPostulacion, idEntrevista, onClose, onG
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl max-w-md w-full shadow-xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 overflow-y-auto">
+      <div className="bg-white rounded-2xl max-w-md w-full shadow-xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in duration-200 my-auto">
         
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50">
-          <div className="flex items-center gap-2 text-emerald-700 font-semibold text-base">
-            <CheckCircle2 className="w-5 h-5" />
-            <span>¡Candidato Aprobado! Registrar Ingreso</span>
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-slate-100 bg-slate-50">
+          <div className="flex items-center gap-2 text-emerald-700 font-semibold text-sm sm:text-base truncate">
+            <CheckCircle2 className="w-5 h-5 shrink-0" />
+            <span className="truncate">¡Candidato Aprobado! Registrar Ingreso</span>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors">
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors shrink-0">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {loadingDatos ? (
           <div className="flex items-center justify-center p-12 text-slate-500 gap-2">
-            <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
+            <Loader2 className="w-5 h-5 animate-spin text-blue-600 shrink-0" />
             <span className="text-sm">Verificando datos del candidato...</span>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4">
             {error && <div className="p-3 bg-red-50 text-red-700 text-xs rounded-xl">{error}</div>}
             
             {/* Alerta visual de que la acción es irreversible */}
@@ -166,7 +166,7 @@ export default function ModalIngreso({ idPostulacion, idEntrevista, onClose, onG
                       required
                       placeholder="Ingrese el número de DNI..."
                       value={formData.dni}
-                      disabled={tieneDniRegistrado} // Si ya lo tenía, evitamos que lo modifiquen por error aquí (o quítalo si prefieres que sea editable siempre)
+                      disabled={tieneDniRegistrado}
                       onChange={(e) => setFormData(prev => ({ ...prev, dni: e.target.value }))}
                       className={`w-full pl-9 pr-3 py-2 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${
                         tieneDniRegistrado ? 'bg-slate-100 text-slate-600 border-slate-200 cursor-not-allowed' : 'border-slate-300'
@@ -210,12 +210,12 @@ export default function ModalIngreso({ idPostulacion, idEntrevista, onClose, onG
               </>
             )}
 
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+            <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-2 sm:gap-3 pt-3 border-t border-slate-100">
               {pasoConfirmacion ? (
                 <button
                   type="button"
                   onClick={() => setPasoConfirmacion(false)}
-                  className="px-4 py-2 border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium transition-colors"
+                  className="w-full sm:w-auto px-4 py-2 border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium transition-colors text-center"
                 >
                   Volver
                 </button>
@@ -223,7 +223,7 @@ export default function ModalIngreso({ idPostulacion, idEntrevista, onClose, onG
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium transition-colors"
+                  className="w-full sm:w-auto px-4 py-2 border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium transition-colors text-center"
                 >
                   Cancelar
                 </button>
@@ -232,12 +232,12 @@ export default function ModalIngreso({ idPostulacion, idEntrevista, onClose, onG
               <button
                 type="submit"
                 disabled={loading}
-                className={`inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-medium transition-colors shadow-sm text-white disabled:opacity-50 ${
+                className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2 rounded-xl text-sm font-medium transition-colors shadow-sm text-white disabled:opacity-50 ${
                   pasoConfirmacion ? 'bg-amber-600 hover:bg-amber-700' : 'bg-emerald-600 hover:bg-emerald-700'
                 }`}
               >
-                {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-                {pasoConfirmacion ? 'Sí, confirmar ingreso definitivo' : 'Confirmar Ingreso'}
+                {loading && <Loader2 className="w-4 h-4 animate-spin shrink-0" />}
+                <span>{pasoConfirmacion ? 'Sí, confirmar ingreso definitivo' : 'Confirmar Ingreso'}</span>
               </button>
             </div>
           </form>

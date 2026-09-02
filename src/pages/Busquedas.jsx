@@ -129,12 +129,10 @@ export default function Busquedas({ onCrearNueva, onVerDetalleBusqueda }) {
       b.empresa?.nombre?.toLowerCase().includes(busquedaTexto.toLowerCase()) ||
       b.sucursal?.nombre?.toLowerCase().includes(busquedaTexto.toLowerCase());
 
-    // Obtenemos los IDs tanto si vienen directos como si están dentro del objeto relacionado
     const empresaIdB = b.id_empresa || b.empresa?.id;
     const sucursalIdB = b.id_sucursal || b.sucursal?.id;
     const puestoIdB = b.id_puesto || b.puesto?.id;
 
-    // Convertimos ambos a String para evitar conflictos entre números y strings del select
     const empresaMatch = !filtroEmpresa || String(empresaIdB) === String(filtroEmpresa);
     const sucursalMatch = !filtroSucursal || String(sucursalIdB) === String(filtroSucursal);
     const puestoMatch = !filtroPuesto || String(puestoIdB) === String(filtroPuesto);
@@ -159,7 +157,7 @@ export default function Busquedas({ onCrearNueva, onVerDetalleBusqueda }) {
   });
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 relative">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-6 relative">
       <AlertBanner
         tipo={mensajeFeedback?.tipo}
         texto={mensajeFeedback?.texto}
@@ -169,16 +167,16 @@ export default function Busquedas({ onCrearNueva, onVerDetalleBusqueda }) {
       {/* Cabecera */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-800">
             Búsquedas Laborales
           </h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 mt-0.5 sm:mt-1">
             Gestiona, filtra y supervisa todas las posiciones abiertas.
           </p>
         </div>
         <button
           onClick={onCrearNueva}
-          className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm"
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm"
         >
           <Plus className="w-4 h-4" />
           Nueva Búsqueda
@@ -186,8 +184,8 @@ export default function Busquedas({ onCrearNueva, onVerDetalleBusqueda }) {
       </div>
 
       {/* Panel de Filtros */}
-      <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {/* Búsqueda por texto libre */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -206,9 +204,9 @@ export default function Busquedas({ onCrearNueva, onVerDetalleBusqueda }) {
               value={filtroEmpresa}
               onChange={(e) => {
                 setFiltroEmpresa(e.target.value);
-                setFiltroSucursal(""); // Reseteamos sucursal al cambiar empresa
+                setFiltroSucursal("");
               }}
-              className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+              className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white truncate"
             >
               <option value="">Todas las empresas</option>
               {empresas.map((emp) => (
@@ -224,7 +222,7 @@ export default function Busquedas({ onCrearNueva, onVerDetalleBusqueda }) {
             <select
               value={filtroSucursal}
               onChange={(e) => setFiltroSucursal(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+              className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white truncate"
             >
               <option value="">Todas las sucursales</option>
               {sucursalesFiltradasFiltro.map((suc) => (
@@ -240,7 +238,7 @@ export default function Busquedas({ onCrearNueva, onVerDetalleBusqueda }) {
             <select
               value={filtroPuesto}
               onChange={(e) => setFiltroPuesto(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+              className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white truncate"
             >
               <option value="">Todos los puestos</option>
               {puestos.map((pue) => (
@@ -253,9 +251,9 @@ export default function Busquedas({ onCrearNueva, onVerDetalleBusqueda }) {
         </div>
 
         {/* Segunda línea de filtros (Estado y Fechas) */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-2 border-t border-slate-100">
-          <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-            <div className="flex items-center gap-2">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pt-3 border-t border-slate-100">
+          <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+            <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
               <span className="text-xs font-medium text-slate-500">Estado:</span>
               <select
                 value={filtroEstado}
@@ -269,30 +267,30 @@ export default function Busquedas({ onCrearNueva, onVerDetalleBusqueda }) {
               </select>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
               <span className="text-xs font-medium text-slate-500">Desde:</span>
               <input
                 type="date"
                 value={fechaDesde}
                 onChange={(e) => setFechaDesde(e.target.value)}
-                className="px-2 py-1 text-xs border border-slate-200 rounded-lg"
+                className="px-2.5 py-1 text-xs border border-slate-200 rounded-lg bg-white"
               />
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
               <span className="text-xs font-medium text-slate-500">Hasta:</span>
               <input
                 type="date"
                 value={fechaHasta}
                 onChange={(e) => setFechaHasta(e.target.value)}
-                className="px-2 py-1 text-xs border border-slate-200 rounded-lg"
+                className="px-2.5 py-1 text-xs border border-slate-200 rounded-lg bg-white"
               />
             </div>
           </div>
 
           <button
             onClick={limpiarFiltros}
-            className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-800 transition-colors self-end sm:self-center"
+            className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-800 transition-colors self-end lg:self-center py-1"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             Limpiar filtros
@@ -300,7 +298,7 @@ export default function Busquedas({ onCrearNueva, onVerDetalleBusqueda }) {
         </div>
       </div>
 
-      {/* Contenido / Tabla */}
+      {/* Contenido / Tabla con vista responsiva avanzada (Tarjetas en móvil, Tabla en desktop) */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-16 text-slate-500 gap-2">
@@ -308,7 +306,7 @@ export default function Busquedas({ onCrearNueva, onVerDetalleBusqueda }) {
             <span>Cargando búsquedas...</span>
           </div>
         ) : busquedasFiltradas.length === 0 ? (
-          <div className="text-center py-16 text-slate-500">
+          <div className="text-center py-16 text-slate-500 px-4">
             <p className="font-medium">
               No se encontraron búsquedas con los filtros seleccionados.
             </p>
@@ -320,109 +318,200 @@ export default function Busquedas({ onCrearNueva, onVerDetalleBusqueda }) {
             </button>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-slate-200 bg-slate-50 text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                  <th className="p-4">Fecha</th>
-                  <th className="p-4">Puesto / Área</th>
-                  <th className="p-4">Empresa / Sucursal</th>
-                  <th className="p-4">Postulantes</th>
-                  <th className="p-4">Estado</th>
-                  <th className="p-4 text-right">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-sm">
-                {busquedasFiltradas.map((b) => {
-                  const fechaFormateada = b.created_at
-                    ? new Date(b.created_at).toLocaleDateString()
-                    : "-";
+          <>
+            {/* Vista en Tarjetas para móviles (< 768px) */}
+            <div className="block md:hidden divide-y divide-slate-100">
+              {busquedasFiltradas.map((b) => {
+                const fechaFormateada = b.created_at
+                  ? new Date(b.created_at).toLocaleDateString()
+                  : "-";
 
-                  const cantidadPostulantes = Array.isArray(b.postulaciones)
-                    ? b.postulaciones.length
-                    : Array.isArray(b.postulacion)
-                      ? b.postulacion.length
-                      : 0;
+                const cantidadPostulantes = Array.isArray(b.postulaciones)
+                  ? b.postulaciones.length
+                  : Array.isArray(b.postulacion)
+                    ? b.postulacion.length
+                    : 0;
 
-                  return (
-                    <tr
-                      key={b.id}
-                      className="hover:bg-slate-50/50 transition-colors"
-                    >
-                      <td className="p-4 text-slate-500 whitespace-nowrap">
-                        {fechaFormateada}
-                      </td>
-                      <td className="p-4">
+                return (
+                  <div key={b.id} className="p-4 space-y-3 bg-white">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
                         <button
                           onClick={() =>
                             onVerDetalleBusqueda && onVerDetalleBusqueda(b.id)
                           }
-                          className="font-semibold text-blue-600 hover:text-blue-800 text-left transition-colors cursor-pointer group"
+                          className="font-semibold text-blue-600 hover:text-blue-800 text-left text-sm transition-colors"
                         >
                           {b.puesto?.nombre || "Sin puesto"}
-                          <span className="block text-[11px] font-normal text-slate-500">
-                            {b.puesto?.departamento?.nombre ||
-                              "Sin departamento"}
-                          </span>
                         </button>
-                      </td>
-                      <td className="p-4">
-                        <div className="text-slate-800 font-medium">
-                          {b.empresa?.nombre || "-"}
-                        </div>
-                        <div className="text-xs text-slate-500">
-                          {b.sucursal?.nombre || "-"}
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-medium">
-                          <Users className="w-3.5 h-3.5 text-slate-500" />
-                          {cantidadPostulantes} inscriptos
+                        <span className="block text-[11px] text-slate-500">
+                          {b.puesto?.departamento?.nombre || "Sin departamento"} • {fechaFormateada}
                         </span>
-                      </td>
-                      <td className="p-4">
-                        <select
-                          value={b.estado}
-                          onChange={(e) =>
-                            handleCambiarEstado(b.id, e.target.value)
-                          }
-                          className={`px-2.5 py-1 rounded-full text-xs font-semibold border cursor-pointer ${
-                            b.estado === "Abierta"
-                              ? "bg-green-50 text-green-700 border-green-200"
-                              : b.estado === "Pausada"
-                                ? "bg-amber-50 text-amber-700 border-amber-200"
-                                : "bg-slate-100 text-slate-700 border-slate-200"
-                          }`}
-                        >
-                          <option value="Abierta">Abierta</option>
-                          <option value="Pausada">Pausada</option>
-                          <option value="Cerrada">Cerrada</option>
-                        </select>
-                      </td>
-                      <td className="p-4 text-right space-x-1">
+                      </div>
+                      
+                      <select
+                        value={b.estado}
+                        onChange={(e) =>
+                          handleCambiarEstado(b.id, e.target.value)
+                        }
+                        className={`px-2 py-0.5 rounded-full text-[11px] font-semibold border cursor-pointer shrink-0 ${
+                          b.estado === "Abierta"
+                            ? "bg-green-50 text-green-700 border-green-200"
+                            : b.estado === "Pausada"
+                              ? "bg-amber-50 text-amber-700 border-amber-200"
+                              : "bg-slate-100 text-slate-700 border-slate-200"
+                        }`}
+                      >
+                        <option value="Abierta">Abierta</option>
+                        <option value="Pausada">Pausada</option>
+                        <option value="Cerrada">Cerrada</option>
+                      </select>
+                    </div>
+
+                    <div className="text-xs text-slate-600 bg-slate-50 p-2.5 rounded-lg space-y-1">
+                      <div className="font-medium text-slate-800">
+                        {b.empresa?.nombre || "-"}
+                      </div>
+                      <div className="text-slate-500">
+                        {b.sucursal?.nombre || "-"}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-1">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-medium">
+                        <Users className="w-3.5 h-3.5 text-slate-500" />
+                        {cantidadPostulantes} inscriptos
+                      </span>
+
+                      <div className="flex items-center gap-1">
                         <button
                           onClick={() =>
                             onVerDetalleBusqueda && onVerDetalleBusqueda(b.id)
                           }
-                          className="p-2 text-slate-400 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-colors inline-block"
-                          title="Ver detalle completo y candidatos"
+                          className="p-2 text-slate-500 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
+                          title="Ver detalle completo"
                         >
                           <Eye className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => setBusquedaAEliminar(b)}
-                          className="p-2 text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors inline-block"
+                          className="p-2 text-slate-500 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors"
                           title="Eliminar búsqueda"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Vista en Tabla Tradicional para Tablets y Escritorio (>= 768px) */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-200 bg-slate-50 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    <th className="p-4">Fecha</th>
+                    <th className="p-4">Puesto / Área</th>
+                    <th className="p-4">Empresa / Sucursal</th>
+                    <th className="p-4">Postulantes</th>
+                    <th className="p-4">Estado</th>
+                    <th className="p-4 text-right">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-sm">
+                  {busquedasFiltradas.map((b) => {
+                    const fechaFormateada = b.created_at
+                      ? new Date(b.created_at).toLocaleDateString()
+                      : "-";
+
+                    const cantidadPostulantes = Array.isArray(b.postulaciones)
+                      ? b.postulaciones.length
+                      : Array.isArray(b.postulacion)
+                        ? b.postulacion.length
+                        : 0;
+
+                    return (
+                      <tr
+                        key={b.id}
+                        className="hover:bg-slate-50/50 transition-colors"
+                      >
+                        <td className="p-4 text-slate-500 whitespace-nowrap">
+                          {fechaFormateada}
+                        </td>
+                        <td className="p-4">
+                          <button
+                            onClick={() =>
+                              onVerDetalleBusqueda && onVerDetalleBusqueda(b.id)
+                            }
+                            className="font-semibold text-blue-600 hover:text-blue-800 text-left transition-colors cursor-pointer group"
+                          >
+                            {b.puesto?.nombre || "Sin puesto"}
+                            <span className="block text-[11px] font-normal text-slate-500">
+                              {b.puesto?.departamento?.nombre ||
+                                "Sin departamento"}
+                            </span>
+                          </button>
+                        </td>
+                        <td className="p-4">
+                          <div className="text-slate-800 font-medium">
+                            {b.empresa?.nombre || "-"}
+                          </div>
+                          <div className="text-xs text-slate-500">
+                            {b.sucursal?.nombre || "-"}
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-medium">
+                            <Users className="w-3.5 h-3.5 text-slate-500" />
+                            {cantidadPostulantes} inscriptos
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <select
+                            value={b.estado}
+                            onChange={(e) =>
+                              handleCambiarEstado(b.id, e.target.value)
+                            }
+                            className={`px-2.5 py-1 rounded-full text-xs font-semibold border cursor-pointer ${
+                              b.estado === "Abierta"
+                                ? "bg-green-50 text-green-700 border-green-200"
+                                : b.estado === "Pausada"
+                                  ? "bg-amber-50 text-amber-700 border-amber-200"
+                                  : "bg-slate-100 text-slate-700 border-slate-200"
+                            }`}
+                          >
+                            <option value="Abierta">Abierta</option>
+                            <option value="Pausada">Pausada</option>
+                            <option value="Cerrada">Cerrada</option>
+                          </select>
+                        </td>
+                        <td className="p-4 text-right space-x-1 whitespace-nowrap">
+                          <button
+                            onClick={() =>
+                              onVerDetalleBusqueda && onVerDetalleBusqueda(b.id)
+                            }
+                            className="p-2 text-slate-400 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-colors inline-block"
+                            title="Ver detalle completo y candidatos"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => setBusquedaAEliminar(b)}
+                            className="p-2 text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors inline-block"
+                            title="Eliminar búsqueda"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
 

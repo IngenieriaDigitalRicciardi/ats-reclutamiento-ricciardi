@@ -135,61 +135,65 @@ export default function Dashboard() {
   }))
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="max-w-7xl mx-auto space-y-6 pb-12">
       
       {/* Encabezado y Filtro por Fechas */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Dashboard de Reclutamiento</h1>
-          <p className="text-sm text-slate-500 mt-1">Métricas y reporte oficial de rendimiento filtrado por periodo.</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-800">Dashboard de Reclutamiento</h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">Métricas y reporte oficial de rendimiento filtrado por periodo.</p>
         </div>
 
         {/* Barra de Filtros de Fecha */}
-        <form onSubmit={aplicarFiltros} className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
-            <Filter className="w-4 h-4 text-blue-600" />
-            <span>Desde:</span>
+        <form onSubmit={aplicarFiltros} className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3">
+          <div className="flex items-center justify-between sm:justify-start gap-1.5 text-xs text-slate-600 font-medium">
+            <span className="flex items-center gap-1.5">
+              <Filter className="w-4 h-4 text-blue-600 shrink-0" />
+              <span>Desde:</span>
+            </span>
             <input 
               type="date" 
               value={fechaInicio} 
               onChange={(e) => setFechaInicio(e.target.value)}
-              className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 w-36 sm:w-auto"
             />
           </div>
 
-          <div className="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+          <div className="flex items-center justify-between sm:justify-start gap-1.5 text-xs text-slate-600 font-medium">
             <span>Hasta:</span>
             <input 
               type="date" 
               value={fechaFin} 
               onChange={(e) => setFechaFin(e.target.value)}
-              className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 w-36 sm:w-auto"
             />
           </div>
 
-          <button 
-            type="submit"
-            className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold transition-colors shadow-sm"
-          >
-            Filtrar
-          </button>
+          <div className="flex items-center gap-2 mt-1 sm:mt-0">
+            <button 
+              type="submit"
+              className="flex-1 sm:flex-none px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold transition-colors shadow-sm text-center"
+            >
+              Filtrar
+            </button>
 
-          <button 
-            type="button"
-            onClick={reiniciarFiltros}
-            title="Restablecer al año actual"
-            className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg transition-colors"
-          >
-            <RotateCcw className="w-4 h-4" />
-          </button>
+            <button 
+              type="button"
+              onClick={reiniciarFiltros}
+              title="Restablecer al año actual"
+              className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg transition-colors flex items-center justify-center shrink-0"
+            >
+              <RotateCcw className="w-4 h-4" />
+            </button>
+          </div>
         </form>
       </div>
 
       {/* Indicador de Tasa de Selección */}
-      <div className="flex justify-end">
-        <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-xl text-xs font-semibold border border-blue-100">
-          <TrendingUp className="w-4 h-4" />
-          Tasa de Selección en periodo: {tasaSeleccion}%
+      <div className="flex justify-start sm:justify-end">
+        <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-xl text-xs font-semibold border border-blue-100 w-full sm:w-auto justify-center sm:justify-start">
+          <TrendingUp className="w-4 h-4 shrink-0" />
+          <span>Tasa de Selección en periodo: {tasaSeleccion}%</span>
         </div>
       </div>
 
@@ -201,7 +205,7 @@ export default function Dashboard() {
             <h3 className="text-2xl font-bold text-slate-800 mt-1">{busquedasAbiertas}</h3>
             <span className="text-xs text-slate-500">De {totalBusquedas} en el periodo</span>
           </div>
-          <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
+          <div className="p-3 bg-blue-50 text-blue-600 rounded-xl shrink-0">
             <Briefcase className="w-6 h-6" />
           </div>
         </div>
@@ -212,7 +216,7 @@ export default function Dashboard() {
             <h3 className="text-2xl font-bold text-slate-800 mt-1">{totalCandidatosReporte}</h3>
             <span className="text-xs text-slate-500">Registrados</span>
           </div>
-          <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
+          <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl shrink-0">
             <Users className="w-6 h-6" />
           </div>
         </div>
@@ -223,7 +227,7 @@ export default function Dashboard() {
             <h3 className="text-2xl font-bold text-slate-800 mt-1">{ingresaron}</h3>
             <span className="text-xs text-slate-500">Contrataciones</span>
           </div>
-          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
+          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl shrink-0">
             <UserCheck className="w-6 h-6" />
           </div>
         </div>
@@ -234,48 +238,48 @@ export default function Dashboard() {
             <h3 className="text-2xl font-bold text-slate-800 mt-1">{datos.entrevistas.length}</h3>
             <span className="text-xs text-slate-500">En el periodo</span>
           </div>
-          <div className="p-3 bg-purple-50 text-purple-600 rounded-xl">
+          <div className="p-3 bg-purple-50 text-purple-600 rounded-xl shrink-0">
             <Clock className="w-6 h-6" />
           </div>
         </div>
       </div>
 
       {/* 2. REPORTE GENERAL POR PERIODO */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+      <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-3 gap-2">
           <div className="flex items-center gap-2">
-            <FileText className="w-5 h-5 text-blue-600" />
-            <h3 className="font-bold text-slate-800 text-base">Resultados Generales del Periodo Seleccionado</h3>
+            <FileText className="w-5 h-5 text-blue-600 shrink-0" />
+            <h3 className="font-bold text-slate-800 text-sm sm:text-base">Resultados Generales del Periodo Seleccionado</h3>
           </div>
-          <span className="text-xs bg-slate-100 text-slate-600 font-medium px-2.5 py-1 rounded-lg">
+          <span className="text-xs bg-slate-100 text-slate-600 font-medium px-2.5 py-1 rounded-lg self-start sm:self-auto">
             {fechaInicio} al {fechaFin}
           </span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-          <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 text-center">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+          <div className="bg-slate-50 p-3.5 sm:p-4 rounded-xl border border-slate-100 text-center">
             <p className="text-xs font-semibold text-slate-500">Entrevistados</p>
-            <p className="text-xl font-bold text-slate-800 mt-1">{datos.entrevistas.length}</p>
+            <p className="text-lg sm:text-xl font-bold text-slate-800 mt-1">{datos.entrevistas.length}</p>
           </div>
-          <div className="bg-emerald-50/60 p-4 rounded-xl border border-emerald-100 text-center">
+          <div className="bg-emerald-50/60 p-3.5 sm:p-4 rounded-xl border border-emerald-100 text-center">
             <p className="text-xs font-semibold text-emerald-700">Ingresaron</p>
-            <p className="text-xl font-bold text-emerald-800 mt-1">{ingresaron}</p>
+            <p className="text-lg sm:text-xl font-bold text-emerald-800 mt-1">{ingresaron}</p>
           </div>
-          <div className="bg-red-50/60 p-4 rounded-xl border border-red-100 text-center">
+          <div className="bg-red-50/60 p-3.5 sm:p-4 rounded-xl border border-red-100 text-center">
             <p className="text-xs font-semibold text-red-700">No aplican</p>
-            <p className="text-xl font-bold text-red-800 mt-1">{noAplican}</p>
+            <p className="text-lg sm:text-xl font-bold text-red-800 mt-1">{noAplican}</p>
           </div>
-          <div className="bg-amber-50/60 p-4 rounded-xl border border-amber-100 text-center">
+          <div className="bg-amber-50/60 p-3.5 sm:p-4 rounded-xl border border-amber-100 text-center">
             <p className="text-xs font-semibold text-amber-700">No acepta oferta</p>
-            <p className="text-xl font-bold text-amber-800 mt-1">{noAceptaOferta}</p>
+            <p className="text-lg sm:text-xl font-bold text-amber-800 mt-1">{noAceptaOferta}</p>
           </div>
-          <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 text-center">
+          <div className="bg-slate-50 p-3.5 sm:p-4 rounded-xl border border-slate-100 text-center">
             <p className="text-xs font-semibold text-slate-500">Sin respuesta</p>
-            <p className="text-xl font-bold text-slate-800 mt-1">{sinRespuesta}</p>
+            <p className="text-lg sm:text-xl font-bold text-slate-800 mt-1">{sinRespuesta}</p>
           </div>
-          <div className="bg-blue-50/60 p-4 rounded-xl border border-blue-100 text-center">
+          <div className="bg-blue-50/60 p-3.5 sm:p-4 rounded-xl border border-blue-100 text-center col-span-2 sm:col-span-1">
             <p className="text-xs font-semibold text-blue-700">En proceso activo</p>
-            <p className="text-xl font-bold text-blue-800 mt-1">{enProcesoActivo}</p>
+            <p className="text-lg sm:text-xl font-bold text-blue-800 mt-1">{enProcesoActivo}</p>
           </div>
         </div>
       </div>
@@ -283,23 +287,23 @@ export default function Dashboard() {
       {/* 3. Gráficos */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
-          <h3 className="font-semibold text-slate-800 text-base flex items-center gap-2">
-            <PieIcon className="w-4 h-4 text-blue-600" />
+          <h3 className="font-semibold text-slate-800 text-sm sm:text-base flex items-center gap-2">
+            <PieIcon className="w-4 h-4 text-blue-600 shrink-0" />
             Postulaciones por Etapa (Embudo %)
           </h3>
-          <div className="h-72 w-full">
+          <div className="h-72 sm:h-80 w-full">
             {datosEmbudo.length === 0 ? (
               <div className="flex items-center justify-center h-full text-slate-400 text-sm">No hay registros en este periodo.</div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie data={datosEmbudo} cx="50%" cy="50%" outerRadius={85} innerRadius={45} dataKey="value" label={({ name, porcentaje }) => `${name}: ${porcentaje}%`}>
+                  <Pie data={datosEmbudo} cx="50%" cy="50%" outerRadius={75} innerRadius={35} dataKey="value" label={({ name, porcentaje }) => `${name}: ${porcentaje}%`}>
                     {datosEmbudo.map((entry, index) => (
                       <Cell key={`cell-emb-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
                   <Tooltip formatter={(value, name, props) => [`${value} registros (${props.payload.porcentaje}%)`, "Cantidad"]} />
-                  <Legend />
+                  <Legend wrapperStyle={{ fontSize: '12px' }} />
                 </PieChart>
               </ResponsiveContainer>
             )}
@@ -307,23 +311,23 @@ export default function Dashboard() {
         </div>
 
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
-          <h3 className="font-semibold text-slate-800 text-base flex items-center gap-2">
-            <PieIcon className="w-4 h-4 text-emerald-600" />
+          <h3 className="font-semibold text-slate-800 text-sm sm:text-base flex items-center gap-2">
+            <PieIcon className="w-4 h-4 text-emerald-600 shrink-0" />
             Distribución de Búsquedas por Empresa (%)
           </h3>
-          <div className="h-72 w-full">
+          <div className="h-72 sm:h-80 w-full">
             {datosEmpresas.length === 0 ? (
               <div className="flex items-center justify-center h-full text-slate-400 text-sm">No hay búsquedas en este periodo.</div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie data={datosEmpresas} cx="50%" cy="50%" outerRadius={85} innerRadius={45} dataKey="value" label={({ name, porcentaje }) => `${name}: ${porcentaje}%`}>
+                  <Pie data={datosEmpresas} cx="50%" cy="50%" outerRadius={75} innerRadius={35} dataKey="value" label={({ name, porcentaje }) => `${name}: ${porcentaje}%`}>
                     {datosEmpresas.map((entry, index) => (
                       <Cell key={`cell-emp-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
                   <Tooltip formatter={(value, name, props) => [`${value} búsquedas (${props.payload.porcentaje}%)`, "Total"]} />
-                  <Legend />
+                  <Legend wrapperStyle={{ fontSize: '12px' }} />
                 </PieChart>
               </ResponsiveContainer>
             )}

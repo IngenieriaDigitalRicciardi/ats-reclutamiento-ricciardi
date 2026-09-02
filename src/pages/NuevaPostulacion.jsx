@@ -1,154 +1,152 @@
-import React, { useState, useEffect } from 'react'
-import { getBusquedas } from '../lib/api/busquedas'
-import { crearPostulacion } from '../lib/api/postulaciones'
-import { supabase } from '../lib/supabaseClient'
-import { validarPostulacion } from '../utils/validaciones'
-import AlertBanner from '../components/ui/alertbanner'
-import { UserPlus, Link as LinkIcon, Phone, Search, Briefcase, Loader2, ArrowLeft, User, ExternalLink, Check } from 'lucide-react'
+import React, { useState, useEffect } from 'react';
+import { getBusquedas } from '../lib/api/busquedas';
+import { crearPostulacion } from '../lib/api/postulaciones';
+import { supabase } from '../lib/supabaseClient';
+import { validarPostulacion } from '../utils/validaciones';
+import AlertBanner from '../components/ui/alertbanner';
+import { UserPlus, Link as LinkIcon, Phone, Search, Briefcase, Loader2, ArrowLeft, User, ExternalLink, Check } from 'lucide-react';
 
 export default function NuevaPostulacion({ onVolver }) {
-  const [busquedas, setBusquedas] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [mensajeFeedback, setMensajeFeedback] = useState(null)
+  const [busquedas, setBusquedas] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [mensajeFeedback, setMensajeFeedback] = useState(null);
 
   // Estados para la selección y filtrado de candidatos en tabla
-  const [textoBusquedaCandidato, setTextoBusquedaCandidato] = useState('')
-  const [candidatosDisponibles, setCandidatosDisponibles] = useState([])
-  const [candidatoSeleccionado, setCandidatoSeleccionado] = useState(null)
-  const [cargandoCandidatos, setCargandoCandidatos] = useState(false)
+  const [textoBusquedaCandidato, setTextoBusquedaCandidato] = useState('');
+  const [candidatosDisponibles, setCandidatosDisponibles] = useState([]);
+  const [candidatoSeleccionado, setCandidatoSeleccionado] = useState(null);
+  const [cargandoCandidatos, setCargandoCandidatos] = useState(false);
 
-  // Estados para la búsqueda laboral (reemplazo del select infinito)
-  const [textoBusquedaLaboral, setTextoBusquedaLaboral] = useState('')
-  const [idBusqueda, setIdBusqueda] = useState('')
-  const [busquedaSeleccionadaObj, setBusquedaSeleccionadaObj] = useState(null)
+  // Estados para la búsqueda laboral
+  const [textoBusquedaLaboral, setTextoBusquedaLaboral] = useState('');
+  const [idBusqueda, setIdBusqueda] = useState('');
+  const [busquedaSeleccionadaObj, setBusquedaSeleccionadaObj] = useState(null);
 
   // Cargar búsquedas abiertas y precargar candidatos iniciales al iniciar
   useEffect(() => {
     async function inicializarDatos() {
       try {
-        // Cargar búsquedas
-        const dataBusquedas = await getBusquedas()
-        const abiertas = (dataBusquedas || []).filter(b => b.estado === 'Abierta')
-        setBusquedas(abiertas)
+        const dataBusquedas = await getBusquedas();
+        const abiertas = (dataBusquedas || []).filter(b => b.estado === 'Abierta');
+        setBusquedas(abiertas);
 
-        // Cargar candidatos iniciales (últimos creados o una lista base)
-        cargarCandidatos('')
+        cargarCandidatos('');
       } catch (error) {
-        setMensajeFeedback({ tipo: 'error', texto: 'Error al cargar los datos iniciales.' })
+        setMensajeFeedback({ tipo: 'error', texto: 'Error al cargar los datos iniciales.' });
       }
     }
-    inicializarDatos()
-  }, [])
+    inicializarDatos();
+  }, []);
 
   // Función para buscar/filtrar candidatos para la tabla
   const cargarCandidatos = async (filtro = '') => {
     try {
-      setCargandoCandidatos(true)
-      const queryText = filtro.trim()
+      setCargandoCandidatos(true);
+      const queryText = filtro.trim();
 
       // Obtener IDs de candidatos ya ingresados para excluirlos
       const { data: ingresosData, error: errorIngresos } = await supabase
         .from('ingreso')
-        .select('postulacion(id_candidato)')
+        .select('postulacion(id_candidato)');
 
-      if (errorIngresos) throw errorIngresos
+      if (errorIngresos) throw errorIngresos;
 
       const idsCandidatosIngresados = ingresosData
         ?.map(i => i.postulacion?.id_candidato)
-        .filter(Boolean) || []
+        .filter(Boolean) || [];
 
       let supabaseQuery = supabase
         .from('candidato')
         .select('*')
-        .limit(20) // Mostramos un lote manejable en la tabla
+        .limit(20);
 
       if (queryText.length > 0) {
-        supabaseQuery = supabaseQuery.or(`nombre.ilike.%${queryText}%,apellido.ilike.%${queryText}%,telefono.ilike.%${queryText}%`)
+        supabaseQuery = supabaseQuery.or(`nombre.ilike.%${queryText}%,apellido.ilike.%${queryText}%,telefono.ilike.%${queryText}%`);
       }
 
       if (idsCandidatosIngresados.length > 0) {
-        const idsString = `(${idsCandidatosIngresados.join(',')})`
-        supabaseQuery = supabaseQuery.not('id', 'in', idsString)
+        const idsString = `(${idsCandidatosIngresados.join(',')})`;
+        supabaseQuery = supabaseQuery.not('id', 'in', idsString);
       }
 
-      const { data, error } = await supabaseQuery
-      if (error) throw error
+      const { data, error } = await supabaseQuery;
+      if (error) throw error;
 
-      setCandidatosDisponibles(data || [])
+      setCandidatosDisponibles(data || []);
     } catch (error) {
-      console.error('Error cargando candidatos:', error)
+      console.error('Error cargando candidatos:', error);
     } finally {
-      setCargandoCandidatos(false)
+      setCargandoCandidatos(false);
     }
-  }
+  };
 
   // Efecto para filtrar candidatos con debounce al escribir
   useEffect(() => {
     const timer = setTimeout(() => {
-      cargarCandidatos(textoBusquedaCandidato)
-    }, 300)
-    return () => clearTimeout(timer)
-  }, [textoBusquedaCandidato])
+      cargarCandidatos(textoBusquedaCandidato);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [textoBusquedaCandidato]);
 
   // Filtrar la lista de búsquedas laborales según el texto ingresado
   const busquedasFiltradas = busquedas.filter(b => {
-    const texto = textoBusquedaLaboral.toLowerCase()
-    const puesto = b.puesto?.nombre?.toLowerCase() || ''
-    const empresa = b.empresa?.nombre?.toLowerCase() || ''
-    const sucursal = b.sucursal?.nombre?.toLowerCase() || ''
-    return puesto.includes(texto) || empresa.includes(texto) || sucursal.includes(texto)
-  })
+    const texto = textoBusquedaLaboral.toLowerCase();
+    const puesto = b.puesto?.nombre?.toLowerCase() || '';
+    const empresa = b.empresa?.nombre?.toLowerCase() || '';
+    const sucursal = b.sucursal?.nombre?.toLowerCase() || '';
+    return puesto.includes(texto) || empresa.includes(texto) || sucursal.includes(texto);
+  });
 
   // Manejar el envío de la postulación
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setMensajeFeedback(null)
+    e.preventDefault();
+    setMensajeFeedback(null);
 
     try {
-      setLoading(true)
+      setLoading(true);
 
-      const idBusquedaNum = idBusqueda ? Number(idBusqueda) : null
-      const idCandidatoNum = candidatoSeleccionado ? Number(candidatoSeleccionado.id) : null
+      const idBusquedaNum = idBusqueda ? Number(idBusqueda) : null;
+      const idCandidatoNum = candidatoSeleccionado ? Number(candidatoSeleccionado.id) : null;
 
       const resultadoValidacion = await validarPostulacion({
         idCandidato: idCandidatoNum,
         idBusqueda: idBusquedaNum
-      })
+      });
 
       if (!resultadoValidacion.esValido) {
-        const primerError = Object.values(resultadoValidacion.errores)[0]
-        setMensajeFeedback({ tipo: 'error', texto: primerError })
-        setLoading(false)
-        return
+        const primerError = Object.values(resultadoValidacion.errores)[0];
+        setMensajeFeedback({ tipo: 'error', texto: primerError });
+        setLoading(false);
+        return;
       }
 
-      await crearPostulacion(idBusquedaNum, idCandidatoNum, null)
+      await crearPostulacion(idBusquedaNum, idCandidatoNum, null);
 
-      setMensajeFeedback({ tipo: 'success', texto: '¡Postulación registrada con éxito!' })
+      setMensajeFeedback({ tipo: 'success', texto: '¡Postulación registrada con éxito!' });
       
       setTimeout(() => {
-        onVolver()
-      }, 1500)
+        onVolver();
+      }, 1500);
 
     } catch (error) {
       if (error.message && error.message.includes('unique_candidato_busqueda')) {
         setMensajeFeedback({ 
           tipo: 'error', 
           texto: 'Este candidato ya se encuentra postulado a esta búsqueda laboral.' 
-        })
+        });
       } else {
         setMensajeFeedback({ 
           tipo: 'error', 
           texto: 'Error al registrar la postulación: ' + error.message 
-        })
+        });
       }
-      setLoading(false)
+      setLoading(false);
     } finally {
       if (!mensajeFeedback || mensajeFeedback.tipo !== 'success') {
-        setLoading(false)
+        setLoading(false);
       }
     }
-  }
+  };
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -281,7 +279,6 @@ export default function NuevaPostulacion({ onVolver }) {
           </h3>
 
           <div className="space-y-3">
-            {/* Input único con su icono de lupa bien posicionado */}
             <div className="relative">
               <Search className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
               <input
@@ -293,17 +290,16 @@ export default function NuevaPostulacion({ onVolver }) {
               />
             </div>
 
-            {/* Contenedor estilo lista con scroll controlado */}
             <div className="border border-slate-200 rounded-xl overflow-hidden max-h-52 overflow-y-auto divide-y divide-slate-100 bg-white">
               {busquedasFiltradas.length > 0 ? (
                 busquedasFiltradas.map((b) => {
-                  const isSelected = String(idBusqueda) === String(b.id)
+                  const isSelected = String(idBusqueda) === String(b.id);
                   return (
                     <div
                       key={b.id}
                       onClick={() => {
-                        setIdBusqueda(b.id)
-                        setBusquedaSeleccionadaObj(b)
+                        setIdBusqueda(b.id);
+                        setBusquedaSeleccionadaObj(b);
                       }}
                       className={`p-3 cursor-pointer flex items-center justify-between transition-colors ${
                         isSelected ? 'bg-blue-50/80 border-l-4 border-blue-600' : 'hover:bg-slate-50'
@@ -325,7 +321,7 @@ export default function NuevaPostulacion({ onVolver }) {
                         </span>
                       )}
                     </div>
-                  )
+                  );
                 })
               ) : (
                 <div className="p-4 text-center text-xs text-slate-500">
@@ -359,10 +355,9 @@ export default function NuevaPostulacion({ onVolver }) {
             Cancelar
           </button>
           <button
-            type="button"
+            type="submit"
             disabled={loading || !candidatoSeleccionado || !idBusqueda}
-            onClick={handleSubmit}
-            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm disabled:opacity-50"
+            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm disabled:opacity-50 cursor-pointer"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
             Vincular Postulación
@@ -371,5 +366,5 @@ export default function NuevaPostulacion({ onVolver }) {
 
       </form>
     </div>
-  )
+  );
 }

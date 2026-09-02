@@ -10,7 +10,9 @@ import {
   MapPin, 
   FileText, 
   Eye, 
-  Filter 
+  Filter, 
+  Download,
+  FileSpreadsheet
 } from "lucide-react";
 
 export default function Ingresos({ onVerDetalle }) {
@@ -23,6 +25,8 @@ export default function Ingresos({ onVerDetalle }) {
   const [filtroPuesto, setFiltroPuesto] = useState("");
   const [filtroEmpresa, setFiltroEmpresa] = useState("TODAS");
   const [filtroSucursal, setFiltroSucursal] = useState("TODAS");
+  const [filtroFechaDesde, setFiltroFechaDesde] = useState("");
+  const [filtroFechaHasta, setFiltroFechaHasta] = useState("");
 
   useEffect(() => {
     cargarIngresos();
@@ -66,7 +70,21 @@ export default function Ingresos({ onVerDetalle }) {
     const coincideSucursal =
       filtroSucursal === "TODAS" || item.sucursal === filtroSucursal;
 
-    return coincideColaborador && coincidePuesto && coincideEmpresa && coincideSucursal;
+    // Filtro por rango de fechas de ingreso
+    let coincideFecha = true;
+    if (item.fecha_ingreso) {
+      const fechaIngresoStr = item.fecha_ingreso.split('T')[0];
+      if (filtroFechaDesde && fechaIngresoStr < filtroFechaDesde) {
+        coincideFecha = false;
+      }
+      if (filtroFechaHasta && fechaIngresoStr > filtroFechaHasta) {
+        coincideFecha = false;
+      }
+    } else if (filtroFechaDesde || filtroFechaHasta) {
+      coincideFecha = false;
+    }
+
+    return coincideColaborador && coincidePuesto && coincideEmpresa && coincideSucursal && coincideFecha;
   });
 
   const limpiarFiltros = () => {
@@ -74,6 +92,39 @@ export default function Ingresos({ onVerDetalle }) {
     setFiltroPuesto("");
     setFiltroEmpresa("TODAS");
     setFiltroSucursal("TODAS");
+    setFiltroFechaDesde("");
+    setFiltroFechaHasta("");
+  };
+
+  const exportarCSV = () => {
+    if (ingresosFiltrados.length === 0) {
+      setMensajeFeedback({
+        tipo: "error",
+        texto: "No hay datos para exportar con los filtros actuales.",
+      });
+      return;
+    }
+
+    const headers = ["Colaborador", "Teléfono", "Puesto", "Empresa", "Sucursal", "Fecha de Ingreso", "Observaciones"];
+    const filas = ingresosFiltrados.map((item) => [
+      `"${item.colaborador || ""}"`,
+      `"${item.telefono || ""}"`,
+      `"${item.puesto || ""}"`,
+      `"${item.empresa || ""}"`,
+      `"${item.sucursal || ""}"`,
+      `"${item.fecha_ingreso ? item.fecha_ingreso.split('T')[0] : ""}"`,
+      `"${(item.observaciones || "").replace(/"/g, '""')}"`,
+    ]);
+
+    const csvContent = "\uFEFF" + [headers.join(";"), ...filas.map(e => e.join(";"))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `reporte_ingresos_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   if (loading) {
@@ -97,6 +148,14 @@ export default function Ingresos({ onVerDetalle }) {
             Listado histórico de candidatos que han ingresado oficialmente a la empresa.
           </p>
         </div>
+
+        <button
+          onClick={exportarCSV}
+          className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl shadow-sm transition-colors self-start sm:self-center"
+        >
+          <FileSpreadsheet className="w-4 h-4" />
+          Exportar Reporte CSV
+        </button>
       </div>
 
       <AlertBanner
@@ -120,7 +179,7 @@ export default function Ingresos({ onVerDetalle }) {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           <div>
             <label className="block text-[11px] font-semibold text-slate-500 mb-1">
               COLABORADOR
@@ -181,6 +240,30 @@ export default function Ingresos({ onVerDetalle }) {
                 </option>
               ))}
             </select>
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-semibold text-slate-500 mb-1">
+              DESDE (FECHA)
+            </label>
+            <input
+              type="date"
+              value={filtroFechaDesde}
+              onChange={(e) => setFiltroFechaDesde(e.target.value)}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-semibold text-slate-500 mb-1">
+              HASTA (FECHA)
+            </label>
+            <input
+              type="date"
+              value={filtroFechaHasta}
+              onChange={(e) => setFiltroFechaHasta(e.target.value)}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+            />
           </div>
         </div>
       </div>

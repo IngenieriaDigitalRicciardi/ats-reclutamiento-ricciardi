@@ -25,29 +25,31 @@ import {
 export default function Catalogos() {
   const [activeTab, setActiveTab] = useState('empresas');
 
-  // Estados de datos
+  // Data States
   const [empresas, setEmpresas] = useState([]);
   const [sucursales, setSucursales] = useState([]);
   const [departamentos, setDepartamentos] = useState([]);
   const [puestos, setPuestos] = useState([]);
 
-  // Estados de búsqueda y filtros
+  // Search & Filter States
   const [searchTerm, setSearchTerm] = useState('');
   const [filterEmpresaId, setFilterEmpresaId] = useState('ALL');
   const [filterDeptId, setFilterDeptId] = useState('ALL');
 
-  // Estados de UI
+  // UI States
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Form states
-  const [empresaNombre, setEmpresaNombre] = useState('');
-  const [sucursalNombre, setSucursalNombre] = useState('');
-  const [sucursalEmpresaId, setSucursalEmpresaId] = useState('');
-  const [puestoNombre, setPuestoNombre] = useState('');
-  const [puestoDeptId, setPuestoDeptId] = useState('');
+  // Unified Form State
+  const [formData, setFormData] = useState({
+    empresaNombre: '',
+    sucursalNombre: '',
+    sucursalEmpresaId: '',
+    puestoNombre: '',
+    puestoDeptId: ''
+  });
 
   const cargarTodo = async () => {
     setLoading(true);
@@ -64,8 +66,11 @@ export default function Catalogos() {
       setDepartamentos(dep || []);
       setPuestos(pue || []);
 
-      if (emp?.length > 0 && !sucursalEmpresaId) setSucursalEmpresaId(emp[0].id);
-      if (dep?.length > 0 && !puestoDeptId) setPuestoDeptId(dep[0].id);
+      setFormData(prev => ({
+        ...prev,
+        sucursalEmpresaId: prev.sucursalEmpresaId || (emp?.[0]?.id ?? ''),
+        puestoDeptId: prev.puestoDeptId || (dep?.[0]?.id ?? '')
+      }));
     } catch (err) {
       setError(err.message || 'Error al cargar los catálogos');
     } finally {
@@ -86,12 +91,15 @@ export default function Catalogos() {
 
   const closeModal = () => {
     setIsModalOpen(false);
-    setEmpresaNombre('');
-    setSucursalNombre('');
-    setPuestoNombre('');
+    setFormData(prev => ({
+      ...prev,
+      empresaNombre: '',
+      sucursalNombre: '',
+      puestoNombre: ''
+    }));
   };
 
-  // --- FILTROS Y BÚSQUEDA MEMOIZADOS ---
+  // --- MEMOIZED FILTERS ---
   const empresasFiltradas = useMemo(() => {
     return empresas.filter(e => 
       e.nombre.toLowerCase().includes(searchTerm.toLowerCase())
@@ -116,13 +124,13 @@ export default function Catalogos() {
     });
   }, [puestos, searchTerm, filterDeptId]);
 
-  // --- HANDLERS PARA AGREGAR ---
+  // --- SUBMISSION HANDLERS ---
   const handleAddEmpresa = async (e) => {
     e.preventDefault();
-    if (!empresaNombre.trim()) return;
+    if (!formData.empresaNombre.trim()) return;
     setSubmitting(true);
     try {
-      await createEmpresa(empresaNombre.trim());
+      await createEmpresa(formData.empresaNombre.trim());
       closeModal();
       await cargarTodo();
     } catch (err) { setError(err.message); }
@@ -131,10 +139,10 @@ export default function Catalogos() {
 
   const handleAddSucursal = async (e) => {
     e.preventDefault();
-    if (!sucursalNombre.trim() || !sucursalEmpresaId) return;
+    if (!formData.sucursalNombre.trim() || !formData.sucursalEmpresaId) return;
     setSubmitting(true);
     try {
-      await createSucursal(sucursalEmpresaId, sucursalNombre.trim());
+      await createSucursal(formData.sucursalEmpresaId, formData.sucursalNombre.trim());
       closeModal();
       await cargarTodo();
     } catch (err) { setError(err.message); }
@@ -143,19 +151,18 @@ export default function Catalogos() {
 
   const handleAddPuesto = async (e) => {
     e.preventDefault();
-    if (!puestoNombre.trim() || !puestoDeptId) return;
+    if (!formData.puestoNombre.trim() || !formData.puestoDeptId) return;
     setSubmitting(true);
     try {
-      await createPuesto(puestoDeptId, puestoNombre.trim());
+      await createPuesto(formData.puestoDeptId, formData.puestoNombre.trim());
       closeModal();
       await cargarTodo();
     } catch (err) { setError(err.message); }
     finally { setSubmitting(false); }
   };
 
-  // --- HANDLER ELIMINAR ---
   const handleDelete = async (fn, id, label) => {
-    if (!confirm(`¿Estás seguro de eliminar este registro de ${label}?`)) return;
+    if (!window.confirm(`¿Estás seguro de eliminar este registro de ${label}?`)) return;
     try {
       await fn(id);
       await cargarTodo();
@@ -164,7 +171,7 @@ export default function Catalogos() {
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-10">
-      {/* Header Profesional */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
         <div>
           <div className="flex items-center gap-2">
@@ -196,61 +203,36 @@ export default function Catalogos() {
         </div>
       )}
 
-      {/* Navigation Tabs Estilizados */}
+      {/* Tabs */}
       <div className="flex border-b border-slate-200/80 space-x-6 px-1">
-        <button
-          onClick={() => handleTabChange('empresas')}
-          className={`flex items-center gap-2 pb-3.5 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
-            activeTab === 'empresas'
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          <Building className="w-4 h-4" />
-          Empresas
-          <span className={`ml-1 text-xs px-2 py-0.5 rounded-full font-medium ${
-            activeTab === 'empresas' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'
-          }`}>
-            {empresas.length}
-          </span>
-        </button>
-
-        <button
-          onClick={() => handleTabChange('sucursales')}
-          className={`flex items-center gap-2 pb-3.5 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
-            activeTab === 'sucursales'
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          <MapPin className="w-4 h-4" />
-          Sucursales
-          <span className={`ml-1 text-xs px-2 py-0.5 rounded-full font-medium ${
-            activeTab === 'sucursales' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'
-          }`}>
-            {sucursales.length}
-          </span>
-        </button>
-
-        <button
-          onClick={() => handleTabChange('puestos')}
-          className={`flex items-center gap-2 pb-3.5 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
-            activeTab === 'puestos'
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          <Briefcase className="w-4 h-4" />
-          Puestos
-          <span className={`ml-1 text-xs px-2 py-0.5 rounded-full font-medium ${
-            activeTab === 'puestos' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'
-          }`}>
-            {puestos.length}
-          </span>
-        </button>
+        {[
+          { id: 'empresas', label: 'Empresas', icon: Building, count: empresas.length },
+          { id: 'sucursales', label: 'Sucursales', icon: MapPin, count: sucursales.length },
+          { id: 'puestos', label: 'Puestos', icon: Briefcase, count: puestos.length }
+        ].map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => handleTabChange(tab.id)}
+              className={`flex items-center gap-2 pb-3.5 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
+                isActive ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <Icon className="w-4 h-4" />
+              {tab.label}
+              <span className={`ml-1 text-xs px-2 py-0.5 rounded-full font-medium ${
+                isActive ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'
+              }`}>
+                {tab.count}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
-      {/* BARRA DE BÚSQUEDA Y FILTROS */}
+      {/* Search & Filters */}
       <div className="bg-white p-3.5 rounded-xl shadow-xs border border-slate-200/80 flex flex-col md:flex-row gap-3 items-center justify-between">
         <div className="relative w-full md:w-80">
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -262,16 +244,12 @@ export default function Catalogos() {
             className="w-full pl-9 pr-8 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-slate-50/50 focus:bg-white transition-all text-slate-800 placeholder:text-slate-400"
           />
           {searchTerm && (
-            <button 
-              onClick={() => setSearchTerm('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
-            >
+            <button onClick={() => setSearchTerm('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5">
               <X className="w-3.5 h-3.5" />
             </button>
           )}
         </div>
 
-        {/* Filtros específicos por Tab */}
         <div className="flex items-center gap-3 w-full md:w-auto justify-end">
           {activeTab === 'sucursales' && (
             <div className="flex items-center gap-2 w-full md:w-auto">
@@ -307,11 +285,7 @@ export default function Catalogos() {
 
           {(searchTerm || filterEmpresaId !== 'ALL' || filterDeptId !== 'ALL') && (
             <button
-              onClick={() => {
-                setSearchTerm('');
-                setFilterEmpresaId('ALL');
-                setFilterDeptId('ALL');
-              }}
+              onClick={() => { setSearchTerm(''); setFilterEmpresaId('ALL'); setFilterDeptId('ALL'); }}
               className="text-xs text-blue-600 hover:text-blue-800 font-semibold px-2.5 py-1.5 rounded-lg hover:bg-blue-50 transition-colors"
             >
               Limpiar filtros
@@ -320,6 +294,7 @@ export default function Catalogos() {
         </div>
       </div>
 
+      {/* Main Content Area */}
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 text-slate-400 gap-3 bg-white rounded-2xl border border-slate-200/80">
           <Loader2 className="w-7 h-7 animate-spin text-blue-600" />
@@ -327,8 +302,6 @@ export default function Catalogos() {
         </div>
       ) : (
         <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 overflow-hidden">
-          
-          {/* TAB 1: EMPRESAS */}
           {activeTab === 'empresas' && (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm text-slate-600">
@@ -340,7 +313,7 @@ export default function Catalogos() {
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {empresasFiltradas.map((emp) => (
-                    <tr key={emp.id} className="hover:bg-slate-50/60 transition-colors group">
+                    <tr key={emp.id} className="hover:bg-slate-50/60 transition-colors">
                       <td className="py-4 px-6 font-medium text-slate-800 flex items-center gap-3">
                         <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-semibold text-xs border border-blue-100">
                           {emp.nombre.substring(0, 2).toUpperCase()}
@@ -348,32 +321,20 @@ export default function Catalogos() {
                         {emp.nombre}
                       </td>
                       <td className="py-4 px-6 text-right">
-                        <button
-                          onClick={() => handleDelete(deleteEmpresa, emp.id, 'empresa')}
-                          className="text-slate-400 hover:text-rose-600 p-2 rounded-lg hover:bg-rose-50 transition-colors"
-                          title="Eliminar empresa"
-                        >
+                        <button onClick={() => handleDelete(deleteEmpresa, emp.id, 'empresa')} className="text-slate-400 hover:text-rose-600 p-2 rounded-lg hover:bg-rose-50 transition-colors">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </td>
                     </tr>
                   ))}
                   {empresasFiltradas.length === 0 && (
-                    <tr>
-                      <td colSpan="2" className="py-12 text-center">
-                        <div className="flex flex-col items-center justify-center gap-2">
-                          <Inbox className="w-8 h-8 text-slate-300" />
-                          <p className="text-sm text-slate-500 font-medium">No se encontraron empresas.</p>
-                        </div>
-                      </td>
-                    </tr>
+                    <tr><td colSpan="2" className="py-12 text-center"><EmptyState label="empresas" /></td></tr>
                   )}
                 </tbody>
               </table>
             </div>
           )}
 
-          {/* TAB 2: SUCURSALES */}
           {activeTab === 'sucursales' && (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm text-slate-600">
@@ -386,7 +347,7 @@ export default function Catalogos() {
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {sucursalesFiltradas.map((suc) => (
-                    <tr key={suc.id} className="hover:bg-slate-50/60 transition-colors group">
+                    <tr key={suc.id} className="hover:bg-slate-50/60 transition-colors">
                       <td className="py-4 px-6 font-medium text-slate-800">{suc.nombre}</td>
                       <td className="py-4 px-6">
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100/80 text-slate-700 border border-slate-200/60">
@@ -395,32 +356,20 @@ export default function Catalogos() {
                         </span>
                       </td>
                       <td className="py-4 px-6 text-right">
-                        <button
-                          onClick={() => handleDelete(deleteSucursal, suc.id, 'sucursal')}
-                          className="text-slate-400 hover:text-rose-600 p-2 rounded-lg hover:bg-rose-50 transition-colors"
-                          title="Eliminar sucursal"
-                        >
+                        <button onClick={() => handleDelete(deleteSucursal, suc.id, 'sucursal')} className="text-slate-400 hover:text-rose-600 p-2 rounded-lg hover:bg-rose-50 transition-colors">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </td>
                     </tr>
                   ))}
                   {sucursalesFiltradas.length === 0 && (
-                    <tr>
-                      <td colSpan="3" className="py-12 text-center">
-                        <div className="flex flex-col items-center justify-center gap-2">
-                          <Inbox className="w-8 h-8 text-slate-300" />
-                          <p className="text-sm text-slate-500 font-medium">No se encontraron sucursales.</p>
-                        </div>
-                      </td>
-                    </tr>
+                    <tr><td colSpan="3" className="py-12 text-center"><EmptyState label="sucursales" /></td></tr>
                   )}
                 </tbody>
               </table>
             </div>
           )}
 
-          {/* TAB 3: PUESTOS */}
           {activeTab === 'puestos' && (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm text-slate-600">
@@ -433,7 +382,7 @@ export default function Catalogos() {
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {puestosFiltrados.map((p) => (
-                    <tr key={p.id} className="hover:bg-slate-50/60 transition-colors group">
+                    <tr key={p.id} className="hover:bg-slate-50/60 transition-colors">
                       <td className="py-4 px-6 font-medium text-slate-800">{p.nombre}</td>
                       <td className="py-4 px-6">
                         <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
@@ -441,25 +390,14 @@ export default function Catalogos() {
                         </span>
                       </td>
                       <td className="py-4 px-6 text-right">
-                        <button
-                          onClick={() => handleDelete(deletePuesto, p.id, 'puesto')}
-                          className="text-slate-400 hover:text-rose-600 p-2 rounded-lg hover:bg-rose-50 transition-colors"
-                          title="Eliminar puesto"
-                        >
+                        <button onClick={() => handleDelete(deletePuesto, p.id, 'puesto')} className="text-slate-400 hover:text-rose-600 p-2 rounded-lg hover:bg-rose-50 transition-colors">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </td>
                     </tr>
                   ))}
                   {puestosFiltrados.length === 0 && (
-                    <tr>
-                      <td colSpan="3" className="py-12 text-center">
-                        <div className="flex flex-col items-center justify-center gap-2">
-                          <Inbox className="w-8 h-8 text-slate-300" />
-                          <p className="text-sm text-slate-500 font-medium">No se encontraron puestos.</p>
-                        </div>
-                      </td>
-                    </tr>
+                    <tr><td colSpan="3" className="py-12 text-center"><EmptyState label="puestos" /></td></tr>
                   )}
                 </tbody>
               </table>
@@ -468,70 +406,46 @@ export default function Catalogos() {
         </div>
       )}
 
-      {/* MODAL CON ESTILO PULIDO */}
+      {/* Modal Container */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl shadow-2xl border border-slate-200/80 w-full max-w-md overflow-hidden">
-            {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/50">
               <h3 className="font-bold text-base text-slate-900">
                 {activeTab === 'empresas' && 'Nueva Empresa'}
                 {activeTab === 'sucursales' && 'Nueva Sucursal'}
                 {activeTab === 'puestos' && 'Nuevo Puesto'}
               </h3>
-              <button
-                onClick={closeModal}
-                className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-200/60 transition-colors"
-              >
+              <button onClick={closeModal} className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-200/60 transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Modal Forms */}
+            {/* Form Types */}
             {activeTab === 'empresas' && (
               <form onSubmit={handleAddEmpresa} className="p-6 space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
-                    Nombre de la Empresa
-                  </label>
+                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Nombre de la Empresa</label>
                   <input
                     type="text"
-                    value={empresaNombre}
-                    onChange={(e) => setEmpresaNombre(e.target.value)}
+                    value={formData.empresaNombre}
+                    onChange={(e) => setFormData({ ...formData, empresaNombre: e.target.value })}
                     placeholder="Ej. Ricciardi Logistics"
                     className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800"
                     autoFocus
                   />
                 </div>
-                <div className="flex justify-end gap-2.5 pt-4 border-t border-slate-100">
-                  <button
-                    type="button"
-                    onClick={closeModal}
-                    className="px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={submitting || !empresaNombre.trim()}
-                    className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all shadow-sm"
-                  >
-                    {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
-                    Guardar
-                  </button>
-                </div>
+                <ModalFooter onClose={closeModal} submitting={submitting} disabled={!formData.empresaNombre.trim()} />
               </form>
             )}
 
             {activeTab === 'sucursales' && (
               <form onSubmit={handleAddSucursal} className="p-6 space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
-                    Empresa Perteneciente
-                  </label>
+                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Empresa Perteneciente</label>
                   <select
-                    value={sucursalEmpresaId}
-                    onChange={(e) => setSucursalEmpresaId(e.target.value)}
+                    value={formData.sucursalEmpresaId}
+                    onChange={(e) => setFormData({ ...formData, sucursalEmpresaId: e.target.value })}
                     className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white transition-all text-slate-800"
                   >
                     <option value="" disabled>Seleccionar Empresa</option>
@@ -541,46 +455,26 @@ export default function Catalogos() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
-                    Nombre de la Sucursal
-                  </label>
+                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Nombre de la Sucursal</label>
                   <input
                     type="text"
-                    value={sucursalNombre}
-                    onChange={(e) => setSucursalNombre(e.target.value)}
+                    value={formData.sucursalNombre}
+                    onChange={(e) => setFormData({ ...formData, sucursalNombre: e.target.value })}
                     placeholder="Ej. Sede Rosario"
                     className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800"
                   />
                 </div>
-                <div className="flex justify-end gap-2.5 pt-4 border-t border-slate-100">
-                  <button
-                    type="button"
-                    onClick={closeModal}
-                    className="px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={submitting || !sucursalNombre.trim() || !sucursalEmpresaId}
-                    className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all shadow-sm"
-                  >
-                    {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
-                    Guardar
-                  </button>
-                </div>
+                <ModalFooter onClose={closeModal} submitting={submitting} disabled={!formData.sucursalNombre.trim() || !formData.sucursalEmpresaId} />
               </form>
             )}
 
             {activeTab === 'puestos' && (
               <form onSubmit={handleAddPuesto} className="p-6 space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
-                    Departamento
-                  </label>
+                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Departamento</label>
                   <select
-                    value={puestoDeptId}
-                    onChange={(e) => setPuestoDeptId(e.target.value)}
+                    value={formData.puestoDeptId}
+                    onChange={(e) => setFormData({ ...formData, puestoDeptId: e.target.value })}
                     className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white transition-all text-slate-800"
                   >
                     <option value="" disabled>Seleccionar Departamento</option>
@@ -590,39 +484,45 @@ export default function Catalogos() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
-                    Nombre del Puesto / Cargo
-                  </label>
+                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Nombre del Puesto / Cargo</label>
                   <input
                     type="text"
-                    value={puestoNombre}
-                    onChange={(e) => setPuestoNombre(e.target.value)}
+                    value={formData.puestoNombre}
+                    onChange={(e) => setFormData({ ...formData, puestoNombre: e.target.value })}
                     placeholder="Ej. Analista de Reclutamiento"
                     className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800"
                   />
                 </div>
-                <div className="flex justify-end gap-2.5 pt-4 border-t border-slate-100">
-                  <button
-                    type="button"
-                    onClick={closeModal}
-                    className="px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={submitting || !puestoNombre.trim() || !puestoDeptId}
-                    className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all shadow-sm"
-                  >
-                    {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
-                    Guardar
-                  </button>
-                </div>
+                <ModalFooter onClose={closeModal} submitting={submitting} disabled={!formData.puestoNombre.trim() || !formData.puestoDeptId} />
               </form>
             )}
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// Small UI Helper Components
+function EmptyState({ label }) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-2">
+      <Inbox className="w-8 h-8 text-slate-300" />
+      <p className="text-sm text-slate-500 font-medium">No se encontraron {label}.</p>
+    </div>
+  );
+}
+
+function ModalFooter({ onClose, submitting, disabled }) {
+  return (
+    <div className="flex justify-end gap-2.5 pt-4 border-t border-slate-100">
+      <button type="button" onClick={onClose} className="px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors">
+        Cancelar
+      </button>
+      <button type="submit" disabled={submitting || disabled} className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all shadow-sm">
+        {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
+        Guardar
+      </button>
     </div>
   );
 }

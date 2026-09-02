@@ -3,7 +3,7 @@ import { crearEntrevista, actualizarEntrevista } from "../lib/api/entrevistas";
 import { supabase } from "../lib/supabaseClient";
 import AlertBanner from "../components/ui/alertbanner";
 import { validarEntrevista } from "../utils/validaciones";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Loader2 } from "lucide-react";
 
 export default function NuevaEntrevista({
   postulacion,
@@ -119,6 +119,7 @@ export default function NuevaEntrevista({
         </h3>
         {onClose && (
           <button
+            type="button"
             onClick={onClose}
             className="text-slate-400 hover:text-slate-600"
           >
@@ -177,7 +178,7 @@ export default function NuevaEntrevista({
             <select
               value={modalidad}
               onChange={(e) => setModalidad(e.target.value)}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-white focus:outline-none"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-white focus:outline-none cursor-pointer"
             >
               <option value="Presencial">Presencial</option>
               <option value="Videollamada">Videollamada</option>
@@ -192,7 +193,7 @@ export default function NuevaEntrevista({
             <select
               value={estado}
               onChange={(e) => setEstado(e.target.value)}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-white font-medium focus:outline-none"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-white font-medium focus:outline-none cursor-pointer"
             >
               <option value="Pendiente">Pendiente</option>
               <option value="Aprobado">Aprobado</option>
@@ -211,7 +212,7 @@ export default function NuevaEntrevista({
               placeholder="Detalles sobre su experiencia técnica..."
               value={conocimientoExperiencia}
               onChange={(e) => setConocimientoExperiencia(e.target.value)}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-white focus:outline-none"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-white focus:outline-none resize-none"
             />
           </div>
 
@@ -224,7 +225,7 @@ export default function NuevaEntrevista({
               placeholder="Desempeño general en la entrevista..."
               value={evaluacion}
               onChange={(e) => setEvaluacion(e.target.value)}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-white focus:outline-none"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-white focus:outline-none resize-none"
             />
           </div>
         </div>
@@ -279,8 +280,12 @@ export default function NuevaEntrevista({
             disabled={loading}
             className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm disabled:opacity-50"
           >
-            <Plus className="w-3.5 h-3.5" />
-            {esEdicion ? "Actualizar Entrevista" : "Guardar Entrevista"}
+            {loading ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Plus className="w-3.5 h-3.5" />
+            )}
+            {loading ? "Guardando..." : esEdicion ? "Actualizar Entrevista" : "Guardar Entrevista"}
           </button>
         </div>
       </form>
