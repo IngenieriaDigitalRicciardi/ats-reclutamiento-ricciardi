@@ -75,3 +75,28 @@ export async function eliminarEntrevista(id) {
   if (error) throw error
   return true
 }
+// Obtener entrevistas dentro de un rango para la Agenda (solo lectura)
+export async function getEntrevistasPorRango(desde, hasta) {
+  const { data, error } = await supabase
+    .from("entrevista")
+    .select(`
+      *,
+      postulacion:id_postulacion (
+        id,
+        embudo_estado,
+        candidato:id_candidato (nombre, apellido, telefono, cv_url),
+        busqueda:id_busqueda (
+          id,
+          puesto:id_puesto (nombre),
+          empresa:id_empresa (nombre),
+          sucursal:id_sucursal (nombre)
+        )
+      )
+    `)
+    .gte("fecha", desde)
+    .lte("fecha", hasta)
+    .order("fecha", { ascending: true })
+
+  if (error) throw error
+  return data
+}

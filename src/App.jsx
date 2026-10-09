@@ -14,6 +14,7 @@ import IngresoDetalle from "./pages/IngresoDetalle";
 import Login from "./pages/Login";
 import { Loader2 } from "lucide-react";
 import Dashboard from "./pages/Dashboard";
+import AgendaEntrevistas from "./pages/AgendaEntrevistas";
 
 export default function App() {
   const { session, loading } = useAuth();
@@ -171,6 +172,7 @@ export default function App() {
       {/* Resto de las pestañas */}
       {currentTab === "catalogos" && <Catalogos />}
       {currentTab === "dashboard" && <Dashboard />}
+      {currentTab === "agenda-entrevistas" && <AgendaEntrevistas />}
     </Layout>
   );
 }

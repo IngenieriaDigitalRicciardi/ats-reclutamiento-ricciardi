@@ -8,7 +8,8 @@ import {
   Building2,
   LogOut,
   Menu,
-  X
+  X,
+  CalendarDays
 } from 'lucide-react';
 
 export default function Layout({ children, currentTab, setCurrentTab }) {
@@ -20,6 +21,7 @@ export default function Layout({ children, currentTab, setCurrentTab }) {
     { id: 'vacantes', label: 'Busquedas', icon: Briefcase },
     { id: 'candidatos', label: 'Candidatos', icon: Users },
     { id: 'postulaciones', label: 'Postulaciones', icon: UserCheck },
+    { id: 'agenda-entrevistas', label: 'Agenda Entrevistas', icon: CalendarDays },
     { id: 'catalogos', label: 'Estructura Organizacional', icon: Building2 },
     { id: 'ingresos', label: 'Ingresos', icon: UserCheck }
   ];
